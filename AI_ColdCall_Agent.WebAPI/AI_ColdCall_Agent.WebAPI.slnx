@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../AI_ColdCall_Agent.Core/AI_ColdCall_Agent.Core.csproj" />
+  <Project Path="../AI_ColdCall_Agent.Infrastructure/AI_ColdCall_Agent.Infrastructure.csproj" />
+  <Project Path="AI_ColdCall_Agent.WebAPI/AI_ColdCall_Agent.WebAPI.csproj" />
+</Solution>

@@ -1,0 +1,6 @@
+@AI_ColdCall_Agent.WebAPI_HostAddress = http://localhost:5126
+
+GET {{AI_ColdCall_Agent.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
