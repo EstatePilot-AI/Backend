@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Graduation Project\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj": {}
+    "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj": {}
   },
   "projects": {
-    "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj": {
+    "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
+        "projectUniqueName": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
         "projectName": "AI_ColdCall_Agent.Core",
-        "projectPath": "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
+        "projectPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
         "packagesPath": "C:\\Users\\yussu\\.nuget\\packages\\",
-        "outputPath": "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\obj\\",
+        "outputPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -362,14 +362,14 @@
         }
       }
     },
-    "D:\\Graduation Project\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj": {
+    "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Graduation Project\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj",
+        "projectUniqueName": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj",
         "projectName": "AI_ColdCall_Agent.Infrastructure",
-        "projectPath": "D:\\Graduation Project\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj",
+        "projectPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\yussu\\.nuget\\packages\\",
-        "outputPath": "D:\\Graduation Project\\AI_ColdCall_Agent.Infrastructure\\obj\\",
+        "outputPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -391,8 +391,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj": {
-                "projectPath": "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj"
+              "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj": {
+                "projectPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj"
               }
             }
           }

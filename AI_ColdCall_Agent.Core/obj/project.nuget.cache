@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Y5PenecyBY0=",
+  "dgSpecHash": "A64BEO1eCyk=",
   "success": true,
-  "projectFilePath": "D:\\Graduation Project\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
+  "projectFilePath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\yussu\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.0\\microsoft.aspnetcore.authentication.jwtbearer.10.0.0.nupkg.sha512",
     "C:\\Users\\yussu\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\10.0.0\\microsoft.aspnetcore.cryptography.internal.10.0.0.nupkg.sha512",
