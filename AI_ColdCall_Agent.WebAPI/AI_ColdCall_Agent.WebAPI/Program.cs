@@ -1,5 +1,7 @@
 using DatabaseContext;
+using Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,13 @@ builder.Services.AddSwaggerGen();
 
 var con = builder.Configuration.GetConnectionString("con");
 builder.Services.AddDbContext<AI_ColdCall_Agent_DbContext>(options => options.UseNpgsql(con));
+
+
+//Inject Services
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+
+
 
 var app = builder.Build();
 
