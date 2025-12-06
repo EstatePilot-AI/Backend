@@ -7,4 +7,5 @@ namespace Identity;
 
 public class ApplicationUser: IdentityUser<Guid>
 {
+	public string Name { get; set; }
 }

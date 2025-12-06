@@ -51,9 +51,6 @@ public class Property
 	public ListingType ListingType { get; set; }
 
 	[Required]
-	public bool Furnished { get; set; }
-
-	[Required]
 	public string Description { get; set; }
 
 	// 1-to-1 with Location

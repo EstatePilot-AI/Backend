@@ -3,6 +3,21 @@
   "WorkspaceRootPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.WebAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\propertieslocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\identity\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\identity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{E82D8692-225C-0CBD-5587-CFC4996C1993}|AI_ColdCall_Agent.WebAPI\\AI_ColdCall_Agent.WebAPI.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.webapi\\ai_coldcall_agent.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{E82D8692-225C-0CBD-5587-CFC4996C1993}|AI_ColdCall_Agent.WebAPI\\AI_ColdCall_Agent.WebAPI.csproj|solutionrelative:ai_coldcall_agent.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -16,19 +31,10 @@
       "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\contacttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\identity\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\dto\\propertydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A57C60A8-0AE9-BBB0-0BFA-244E9E75AC3F}|..\\AI_ColdCall_Agent.Infrastructure\\AI_ColdCall_Agent.Infrastructure.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.infrastructure\\repositories\\repository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E7E970F3-302C-2194-7FB0-A32051DEB165}|..\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.core\\models\\propertieslocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E82D8692-225C-0CBD-5587-CFC4996C1993}|AI_ColdCall_Agent.WebAPI\\AI_ColdCall_Agent.WebAPI.csproj|d:\\graduation project\\backend\\ai_coldcall_agent.webapi\\ai_coldcall_agent.webapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -45,11 +51,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "Deal.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Deal.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\Deal.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Deal.cs",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\Deal.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAIwDEAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T19:27:29.044Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ApplicationUser.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Identity\\ApplicationUser.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Identity\\ApplicationUser.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Identity\\ApplicationUser.cs*",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Identity\\ApplicationUser.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T19:24:59.264Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.WebAPI\\AI_ColdCall_Agent.WebAPI\\appsettings.json",
               "RelativeDocumentMoniker": "AI_ColdCall_Agent.WebAPI\\appsettings.json",
@@ -62,33 +94,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "NegotiationStatus.cs",
-              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
-              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
-              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
-              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:58:21.607Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MeetingStatus.cs",
-              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
-              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
-              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
-              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:58:06.385Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "ContactType.cs",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\ContactType.cs",
               "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\ContactType.cs",
@@ -96,8 +102,7 @@
               "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\ContactType.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:58:03.939Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T18:58:03.939Z"
             },
             {
               "$type": "Document",
@@ -114,7 +119,57 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
+              "Title": "Property.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAA+wDUAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T18:32:22.8Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PropertiesLocation.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs*",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs*",
+              "ViewState": "AgIAACQAAAAAAAAAAAAIwCcAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T18:31:46.818Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MeetingStatus.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\MeetingStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T18:58:06.385Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "NegotiationStatus.cs",
+              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
+              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
+              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
+              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\NegotiationStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-06T18:58:21.607Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "PropertyDto.cs",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\DTO\\PropertyDto.cs",
               "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\DTO\\PropertyDto.cs",
@@ -122,38 +177,11 @@
               "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\DTO\\PropertyDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:57:13.134Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T18:57:13.134Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Property.cs",
-              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
-              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
-              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
-              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\Property.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAQwDsAAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:32:22.8Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "PropertiesLocation.cs",
-              "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
-              "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
-              "ToolTip": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
-              "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Models\\PropertiesLocation.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAcwAgAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T18:31:46.818Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.WebAPI\\AI_ColdCall_Agent.WebAPI\\Program.cs",
               "RelativeDocumentMoniker": "AI_ColdCall_Agent.WebAPI\\Program.cs",
@@ -161,12 +189,11 @@
               "RelativeToolTip": "AI_ColdCall_Agent.WebAPI\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T14:30:14.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T14:30:14.164Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "Repository.cs",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Infrastructure\\Repositories\\Repository.cs",
               "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Infrastructure\\Repositories\\Repository.cs",
@@ -174,12 +201,11 @@
               "RelativeToolTip": "..\\AI_ColdCall_Agent.Infrastructure\\Repositories\\Repository.cs",
               "ViewState": "AgIAADkAAAAAAAAAAAAowHAAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T14:21:01.932Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T14:21:01.932Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "IRepository.cs",
               "DocumentMoniker": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\Interfaces\\IRepository.cs",
               "RelativeDocumentMoniker": "..\\AI_ColdCall_Agent.Core\\Interfaces\\IRepository.cs",
@@ -187,8 +213,7 @@
               "RelativeToolTip": "..\\AI_ColdCall_Agent.Core\\Interfaces\\IRepository.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAsAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T14:12:39.057Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-06T14:12:39.057Z"
             }
           ]
         }

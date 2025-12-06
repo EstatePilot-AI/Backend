@@ -38,10 +38,4 @@ public class PropertiesLocation
 
 	[Required, Range(0, int.MaxValue)]
 	public int ApartmentNumber { get; set; }
-
-	[Range(0.01, double.MaxValue)]
-	public decimal? Latitude { get; set; }
-
-	[Range(0.01, double.MaxValue)]
-	public decimal? Longitude { get; set; }
 }
