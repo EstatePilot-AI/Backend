@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AI_ColdCall_Agent.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e718c3320c8332bab8045fff8cd39d5d6315c7ef")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9756c25cdaf818a8ac786f96f5c6807dfb486f6b")]
 [assembly: System.Reflection.AssemblyProductAttribute("AI_ColdCall_Agent.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AI_ColdCall_Agent.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

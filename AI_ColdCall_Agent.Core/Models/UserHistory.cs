@@ -14,11 +14,11 @@ public class UserHistory
 	public int UserHistoryId { get; set; }
 
 	[Required, ForeignKey("User")]
-	public int UserId { get; set; }
+	public Guid UserId { get; set; }
 	public ApplicationUser User { get; set; }
 
 	[Required, ForeignKey("Role")]
-	public int UserRoleId { get; set; }
+	public Guid UserRoleId { get; set; }
 	public ApplicationRole Role { get; set; }
 
 	[Required]

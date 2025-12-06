@@ -28,7 +28,6 @@ public class AI_ColdCall_Agent_DbContext:IdentityDbContext<ApplicationUser, Appl
 	public DbSet<LeadRequest> LeadRequests { get; set; }
 	public DbSet<LeadRequestStatus> LeadRequestStatuses { get; set; }
 	public DbSet<ListingType> ListingTypes { get; set; }
-	public DbSet<Meeting> Meetings { get; set; }
 	public DbSet<MeetingStatus> MeetingStatuses { get; set; }
 	public DbSet<Negotiation> Negotiations { get; set; }
 	public DbSet<NegotiationStatus> NegotiationStatuses { get; set; }
@@ -38,5 +37,6 @@ public class AI_ColdCall_Agent_DbContext:IdentityDbContext<ApplicationUser, Appl
 	public DbSet<PropertyStatus> PropertyStatuses { get; set; }
 	public DbSet<PropertyType> PropertyTypes { get; set; }
 	public DbSet<SubjectTypeCall> SubjectTypeCalls { get; set; }
+	public DbSet<UserHistory> UserHistories { get; set; }
 
 }
