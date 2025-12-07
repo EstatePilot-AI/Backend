@@ -378,6 +378,76 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+# ========================
+# .NET 10 / general build
+# ========================
+
+# Build results
+bin/
+obj/
+artifacts/
+
+# Debug / Release folders
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Visual Studio temporary files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.ncb
+*.aps
+*.log
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.tmp
+*.tmp_proj
+
+# VS Code and Rider
+.vscode/
+.idea/
+*.code-workspace
+
+# EF Core Migrations / Database artifacts
+*.dbmdl
+*.bak
+*.mdf
+*.ldf
+*.ndf
+healthchecksdb
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Dotnet CLI
+project.lock.json
+project.fragment.lock.json
+*.dotCover
+*.coverage
+*.coveragexml
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
