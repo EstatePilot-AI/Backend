@@ -33,3 +33,21 @@ D:\Graduation Project\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.pdb
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.genruntimeconfig.cache
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\ref\AI_ColdCall_Agent.Infrastructure.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.deps.json
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.runtimeconfig.json
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.pdb
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Core.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\bin\Debug\net10.0\AI_ColdCall_Agent.Core.pdb
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.AssemblyInfo.cs
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.sourcelink.json
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdC.87B34E35.Up2Date
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\refint\AI_ColdCall_Agent.Infrastructure.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.pdb
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\AI_ColdCall_Agent.Infrastructure.genruntimeconfig.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Infrastructure\obj\Debug\net10.0\ref\AI_ColdCall_Agent.Infrastructure.dll
