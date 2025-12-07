@@ -1361,23 +1361,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\yussu\\.nuget\\packages\\": {},
+    "C:\\Users\\nh696\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
+      "projectUniqueName": "C:\\Users\\nh696\\source\\repos\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
       "projectName": "AI_ColdCall_Agent.Core",
-      "projectPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
-      "packagesPath": "C:\\Users\\yussu\\.nuget\\packages\\",
-      "outputPath": "D:\\Graduation Project\\Backend\\AI_ColdCall_Agent.Core\\obj\\",
+      "projectPath": "C:\\Users\\nh696\\source\\repos\\Backend\\AI_ColdCall_Agent.Core\\AI_ColdCall_Agent.Core.csproj",
+      "packagesPath": "C:\\Users\\nh696\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\nh696\\source\\repos\\Backend\\AI_ColdCall_Agent.Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\yussu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\nh696\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1386,7 +1386,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

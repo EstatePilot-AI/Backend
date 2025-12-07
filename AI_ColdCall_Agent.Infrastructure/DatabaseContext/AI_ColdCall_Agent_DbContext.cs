@@ -13,8 +13,20 @@ public class AI_ColdCall_Agent_DbContext:IdentityDbContext<ApplicationUser, Appl
 	public AI_ColdCall_Agent_DbContext(DbContextOptions<AI_ColdCall_Agent_DbContext> options):base(options)
 	{
 	}
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Property>()
+    .HasOne(p => p.Location)
+    .WithOne(p => p.Property)
+    .HasForeignKey<Property>(p => p.LocationId);
 
-	public DbSet<BuyerReference> BuyerReferences { get; set; }
+        
+
+
+        base.OnModelCreating(modelBuilder);
+    }
+
+    public DbSet<BuyerReference> BuyerReferences { get; set; }
 	public DbSet<CallLog> CallLogs { get; set; }
 	public DbSet<CallOutcome> CallOutcomes { get; set; }
 	public DbSet<CallSessionState> CallSessionStates { get; set; }

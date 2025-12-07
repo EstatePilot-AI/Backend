@@ -23,3 +23,16 @@ D:\Graduation Project\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCa
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\refint\AI_ColdCall_Agent.Core.dll
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.pdb
 D:\Graduation Project\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\ref\AI_ColdCall_Agent.Core.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\bin\Debug\net10.0\AI_ColdCall_Agent.Core.deps.json
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\bin\Debug\net10.0\AI_ColdCall_Agent.Core.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\bin\Debug\net10.0\AI_ColdCall_Agent.Core.pdb
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.csproj.AssemblyReference.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.AssemblyInfoInputs.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.AssemblyInfo.cs
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.csproj.CoreCompileInputs.cache
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.sourcelink.json
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\refint\AI_ColdCall_Agent.Core.dll
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\AI_ColdCall_Agent.Core.pdb
+C:\Users\nh696\source\repos\Backend\AI_ColdCall_Agent.Core\obj\Debug\net10.0\ref\AI_ColdCall_Agent.Core.dll

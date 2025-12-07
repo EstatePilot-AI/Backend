@@ -54,6 +54,9 @@ public class Property
 	public string Description { get; set; }
 
 	// 1-to-1 with Location
-	public virtual PropertiesLocation Location { get; set; }
+	
+    public virtual PropertiesLocation Location { get; set; }
 
+    [Required, ForeignKey("PropertiesLocation")]
+    public int LocationId { get; set; }
 }
