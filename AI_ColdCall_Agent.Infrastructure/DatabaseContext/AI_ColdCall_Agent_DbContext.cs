@@ -16,7 +16,7 @@ public class AI_ColdCall_Agent_DbContext:IdentityDbContext<ApplicationUser, Appl
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Property>()
-    .HasOne(p => p.Location)
+    .HasOne(p => p.PropertiesLocation)
     .WithOne(p => p.Property)
     .HasForeignKey<Property>(p => p.LocationId);
 
