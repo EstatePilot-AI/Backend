@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\AI_ColdCall_Agent.Core\AI_ColdCall_Agent.Core.csproj" />
     <ProjectReference Include="..\..\AI_ColdCall_Agent.Infrastructure\AI_ColdCall_Agent.Infrastructure.csproj" />
   </ItemGroup>
