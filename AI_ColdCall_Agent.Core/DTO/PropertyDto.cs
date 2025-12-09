@@ -32,3 +32,12 @@ public class PropertyDto
 
 
 }
+public class PropertyResponceDto
+{ public int PropertyId { get; set; }
+    public int PropertyTypeId { get; set; }
+    public int PropertyStatusId { get; set; }
+    public decimal Price { get; set; }
+    public decimal Area { get; set; }
+    public string Governorate { get; set; }
+
+}
