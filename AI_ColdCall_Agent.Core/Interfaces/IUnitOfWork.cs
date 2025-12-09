@@ -31,6 +31,6 @@ public interface IUnitOfWork
 	public IRepository<PropertyType> PropertyTypes { get; }
 	public IRepository<SubjectTypeCall> SubjectTypeCalls { get; }
 	public IRepository<UserHistory> UserHistories { get; }
-
+	
 	int Save();
 }

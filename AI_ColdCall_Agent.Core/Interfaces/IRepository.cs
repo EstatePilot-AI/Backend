@@ -13,12 +13,12 @@ public interface IRepository<T> where T : class
 	T FindOneItemWithInclude(string[]? includes = null);
 
 	//Get list of Items
-	Task<IEnumerable<T>> GetAllAsync();
+	Task<IEnumerable<T>> GetAllAsync(string includeProperties = null);
 	Task<IEnumerable<T>> FindAllWithIncludeAsync(string[]? includes = null);
 	Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria, string[]? includes = null);
-
-	//Add Item
-	Task<T> AddAsync(T entity);
+	Task<IEnumerable<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes);
+    //Add Item
+    Task<T> AddAsync(T entity);
 
 	//Update Item
 	T Update(T entity);
