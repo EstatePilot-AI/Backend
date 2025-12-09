@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DatabaseContext;
 using Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -17,9 +18,13 @@ builder.Services.AddDbContext<AI_ColdCall_Agent_DbContext>(options => options.Us
 
 
 //Inject Services
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped <IUnitOfWork, UnitOfWork>();
 
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 
 var app = builder.Build();

@@ -17,8 +17,8 @@ public class AI_ColdCall_Agent_DbContext:IdentityDbContext<ApplicationUser, Appl
     {
         modelBuilder.Entity<Property>()
     .HasOne(p => p.PropertiesLocation)
-    .WithOne(p => p.Property)
-    .HasForeignKey<Property>(p => p.LocationId);
+    .WithOne(l => l.Property)
+    .HasForeignKey<PropertiesLocation>(l => l.PropertyId);
 
         
 
