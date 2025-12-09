@@ -34,17 +34,7 @@ namespace Repositories
 
 
 
-        public async Task<IEnumerable<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes)
-        {
-            IQueryable<T> query = _dbSet;
-
-            foreach (var include in includes)
-            {
-                query = query.Include(include);
-            }
-
-            return await query.ToListAsync();
-        }
+       
 
 
         public async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria, string[]? includes = null)

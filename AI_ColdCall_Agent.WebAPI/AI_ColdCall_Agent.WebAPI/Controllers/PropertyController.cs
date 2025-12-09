@@ -71,10 +71,12 @@ public class PropertyController : ControllerBase
     [HttpGet("GetAllProperties")]
     public async Task<IActionResult> GetAllProperties()
     {
-        var properties = await _unitOfWork.Properties.GetAllWithIncludesAsync(
-            p => p.PropertyType,
-            p => p.PropertyStatus,
-            p => p.PropertiesLocation
+        var properties = await _unitOfWork.Properties.FindAllWithIncludeAsync(
+           new string[] {
+            "PropertyType",
+            "PropertyStatus",
+            "PropertiesLocation"
+            }
         );
 
         if (properties == null || !properties.Any())

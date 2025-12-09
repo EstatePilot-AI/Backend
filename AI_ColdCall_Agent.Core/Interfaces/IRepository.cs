@@ -16,7 +16,6 @@ public interface IRepository<T> where T : class
 	Task<IEnumerable<T>> GetAllAsync(string includeProperties = null);
 	Task<IEnumerable<T>> FindAllWithIncludeAsync(string[]? includes = null);
 	Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria, string[]? includes = null);
-	Task<IEnumerable<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes);
     //Add Item
     Task<T> AddAsync(T entity);
 
