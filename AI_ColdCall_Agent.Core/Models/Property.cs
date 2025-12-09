@@ -50,13 +50,10 @@ public class Property
 	public int ListingTypeId { get; set; }
 	public ListingType ListingType { get; set; }
 
-	[Required]
 	public string Description { get; set; }
 
 	// 1-to-1 with Location
 	
     public virtual PropertiesLocation PropertiesLocation { get; set; }
 
-    [Required, ForeignKey("PropertiesLocation")]
-    public int LocationId { get; set; }
 }

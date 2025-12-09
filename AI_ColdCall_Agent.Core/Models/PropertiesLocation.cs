@@ -10,9 +10,9 @@ public class PropertiesLocation
 {
 	[Key]
 	public int LocationId { get; set; }
-
-	
-	public Property Property { get; set; }
+	[ForeignKey("Property")]
+	public int PropertyId { get; set; }
+	public virtual Property Property { get; set; }
 
 	[Required, MaxLength(100)]
 	public string Country { get; set; }
