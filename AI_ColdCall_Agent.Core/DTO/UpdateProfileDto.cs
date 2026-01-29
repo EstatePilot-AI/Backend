@@ -5,15 +5,12 @@ using System.Text;
 
 namespace DTO;
 
-public class ContactDto
+public class UpdateProfileDto
 {
-	[Required, MaxLength(100)]
-	public string Name { get; set; }
+	[Required(ErrorMessage = "Person Name can't be blank")]
+	public string Name {  get; set; }
 
-	[Required]
+	[Required(ErrorMessage = "Phone number can't be blank")]
 	[RegularExpression(@"^(\+20)?(010|011|012|015)[0-9]{8}$", ErrorMessage = "Phone number must be a valid Egyptian mobile number")]
-	public string Phone { get; set; }
-
-	[EmailAddress(ErrorMessage = "Email should be in a proper email address format")]
-	public string Email { get; set; }
+	public string PhoneNumber { get; set; }
 }
