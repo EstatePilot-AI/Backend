@@ -179,4 +179,27 @@ public class ContactController : ControllerBase
 
 		return BadRequest(ModelState);
 	}
+
+	[HttpPut("UpdateContactStatus{id:int}")]
+	public async Task<IActionResult> UpdateContactStatus(int id, string status)
+	{
+		if (ModelState.IsValid)
+		{
+			if (id <= 0)
+			{
+				return BadRequest("Invalid contact ID.");
+			}
+
+			var contact = _unitOfWork.Contacts.FindOneItem(c => c.ContactId == id, new string[] { "ContactStatus", "ContactStatus" });
+
+			if (contact == null)
+			{
+				return NotFound("The contact isn't found in the system");
+			}
+
+			
+		}
+		return BadRequest(ModelState);
+	}
+
 }
