@@ -112,6 +112,15 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+//if (!app.Environment.IsDevelopment())
+//{
+//	app.UseSwagger();
+//	app.UseSwaggerUI(c =>
+//	{
+//		c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+//		c.RoutePrefix = string.Empty; // Set to empty string to serve at root
+//	});
+//}
 
 app.UseHttpsRedirection();
 
