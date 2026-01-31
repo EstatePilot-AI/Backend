@@ -4,6 +4,7 @@ using Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using RestSharp.Extensions;
 
 
 namespace Controllers;
@@ -102,39 +103,35 @@ public class PropertyController : ControllerBase
 
         return Ok(propertyResponses);
     }
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProperty(int id, [FromBody] PropertyDto propertyDto)
+    public async Task<IActionResult> UpdateProperty(int id, [FromBody] PropertyListDto propertyDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-       
         var existingProperty = _unitOfWork.Properties.FindOneItem(
             p => p.PropertyId == id,
-            new string[] { "PropertiesLocation" ,"PropertyStatus" }
+            new string[] { "PropertiesLocation", "PropertyType", "PropertyStatus", "FinishingType" }
         );
 
-        if (existingProperty == null)
-        {
-            return NotFound($"Property with ID {id} not found.");
-        }
+        if (existingProperty == null) return NotFound($"Property {id} not found.");
 
-        existingProperty.SellerContactId = propertyDto.SellerContactId;
-        existingProperty.PropertyTypeId = propertyDto.PropertyTypeId;
-        existingProperty.PropertyStatusId = propertyDto.PropertyStatusId;
+       
+        var typeEntity = _unitOfWork.PropertyTypes.FindOneItem(t => t.Name == propertyDto.PropertyType);
+        if (typeEntity != null) existingProperty.PropertyTypeId = typeEntity.Id;
+
+        var statusEntity = _unitOfWork.PropertyStatuses.FindOneItem(s => s.Name == propertyDto.PropertyStatus);
+        if (statusEntity != null) existingProperty.PropertyStatusId = statusEntity.Id;
+
+        var finishEntity = _unitOfWork.FinishingTypes.FindOneItem(f => f.Name == propertyDto.FinishingType);
+        if (finishEntity != null) existingProperty.FinishingTypeId = finishEntity.Id;
+
+       
         existingProperty.Price = propertyDto.Price;
         existingProperty.Area = propertyDto.Area;
         existingProperty.Rooms = propertyDto.Rooms;
         existingProperty.Bathrooms = propertyDto.Bathrooms;
-        existingProperty.DownPayment = propertyDto.DownPayment;
-        existingProperty.PaymentMethodId = propertyDto.PaymentMethodId;
-        existingProperty.FinishingTypeId = propertyDto.FinishingTypeId;
-        existingProperty.ListingTypeId = propertyDto.ListingTypeId;
-        existingProperty.Description = propertyDto.Description;
 
+     
         if (existingProperty.PropertiesLocation != null)
         {
             existingProperty.PropertiesLocation.Country = propertyDto.Country;
@@ -147,70 +144,11 @@ public class PropertyController : ControllerBase
             existingProperty.PropertiesLocation.ApartmentNumber = propertyDto.ApartmentNumber;
         }
 
-        
-        try
-        {
-            _unitOfWork.Properties.Update(existingProperty);
-            _unitOfWork.Save();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, "An error occurred while updating the property.");
-        }
-
-        return NoContent();
-    }
-
-
-
-
-    [HttpPost]
-    public async Task<IActionResult> CreateProperty([FromBody] PropertyDto propertyDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-
-     
-
-
-        var property = new Property
-        {
-            SellerContactId = propertyDto.SellerContactId,
-            PropertyTypeId = propertyDto.PropertyTypeId,
-            PropertyStatusId = propertyDto.PropertyStatusId,
-            Price = propertyDto.Price,
-            Area = propertyDto.Area,
-            Rooms = propertyDto.Rooms,
-            Bathrooms = propertyDto.Bathrooms,
-            DownPayment = propertyDto.DownPayment,
-            PaymentMethodId = propertyDto.PaymentMethodId,
-            FinishingTypeId = propertyDto.FinishingTypeId,
-            ListingTypeId = propertyDto.ListingTypeId,
-            Description = propertyDto.Description,
-            PropertiesLocation =new PropertiesLocation
-            {
-                Country = propertyDto.Country,
-                Governorate = propertyDto.Governorate,
-                City = propertyDto.City,
-                District = propertyDto.District,
-                Street = propertyDto.Street,
-                BuildingNumber = propertyDto.BuildingNumber,
-                FloorNumber = propertyDto.FloorNumber,
-                ApartmentNumber = propertyDto.ApartmentNumber
-
-            }
-        };
-
-
-
-        await _unitOfWork.Properties.AddAsync(property);
+    
+        _unitOfWork.Properties.Update(existingProperty);
         _unitOfWork.Save();
 
-
-        return CreatedAtAction(nameof(CreateProperty), new { id = property.PropertyId }, property);
+        return NoContent(); 
     }
 
     [HttpGet("GlobalSearch")]
