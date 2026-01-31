@@ -3,112 +3,145 @@ using Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Threading.Tasks;
 
-namespace Repositories;
-
-public class Repository<T>: IRepository<T> where T : class
+namespace Repositories
 {
-	private readonly AI_ColdCall_Agent_DbContext _context;
+    public class Repository<T> : IRepository <T> where T : class
+    {
+        protected readonly AI_ColdCall_Agent_DbContext _context;
+        protected readonly DbSet<T> _dbSet;
 
-	public Repository(AI_ColdCall_Agent_DbContext context)
-	{
-		_context = context;
-	}
+        public Repository(AI_ColdCall_Agent_DbContext context)
+        {
+            _context = context;
+            _dbSet = _context.Set<T>();
+        }
 
-	//Get one Item
-	public async Task<T> GetByIdAsync(int id)
-	{
-		return await _context.Set<T>().FindAsync(id);
-	}
-	public T FindOneItem(Expression<Func<T, bool>> creiteria, string[]? includes = null)
-	{
-		IQueryable<T> query = _context.Set<T>();
+      
 
-		if (includes != null)
-		{
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-		}
-		return query.SingleOrDefault(creiteria);
-	}
-	public T FindOneItemWithInclude(string[]? includes = null)
-	{
-		IQueryable<T> query = _context.Set<T>();
+        public async Task<T> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
 
-		if (includes != null)
-		{
-			foreach (var include in includes)
-			{
-				query = query.Include(include);
-			}
-		}
-		return query.SingleOrDefault();
-	}
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
 
 
-	//Get list of Items
-	public async Task<IEnumerable<T>> GetAllAsync()
-	{
-		return await _context.Set<T>().ToListAsync();
-	}
-	public async Task<IEnumerable<T>> FindAllWithIncludeAsync(string[]? includes = null)
-	{
-		IQueryable<T> queries = _context.Set<T>();
 
-		if (includes != null)
-		{
-			foreach (var include in includes)
-			{
-				queries = queries.Include(include);
-			}
-		}
-		return await queries.ToListAsync();
-	}
-	public async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria, string[]? includes = null)
-	{
-		IQueryable<T> queries = _context.Set<T>();
+        public async Task<IEnumerable<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
 
-		if (includes != null)
-		{
-			foreach (var include in includes)
-			{
-				queries = queries.Include(include);
-			}
-		}
-		return await queries.Where(criteria).ToListAsync();
-	}
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
 
-	//Add Item
-	public async Task<T> AddAsync(T entity)
-	{
-		await _context.AddAsync(entity);
-		return entity;
-	}
+            return await query.ToListAsync();
+        }
 
-	//Delete Item
-	public void Delete(T entity)
-	{
-		_context.Remove(entity);
-	}
 
-	//Update Item
-	public T Update(T entity)
-	{
-		_context.Update(entity);
-		return entity;
-	}
+        public async Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria, string[]? includes = null)
+        {
+            IQueryable<T> query = _dbSet;
 
-	public async Task<int> Count(Expression<Func<T, bool>> criteria)
-	{
-		return await _context.Set<T>().CountAsync(criteria);
-	}
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
 
-	public async Task<double> Sum(Expression<Func<T, double>> criteria)
-	{
-		return await _context.Set<T>().SumAsync(criteria);
-	}
+            return await query.Where(criteria).ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> FindAllWithIncludeAsync(string[]? includes = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public T FindOneItem(Expression<Func<T, bool>> criteria, string[]? includes = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return query.SingleOrDefault(criteria);
+        }
+
+        public T FindOneItemWithInclude(string[]? includes = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return query.SingleOrDefault();
+        }
+
+     
+
+        public async Task<T> AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+            return entity;
+        }
+
+        public void Delete(T entity)
+        {
+            _dbSet.Remove(entity);
+        }
+
+        public T Update(T entity)
+        {
+            _dbSet.Update(entity);
+            return entity;
+        }
+
+      
+        public async Task<int> Count(Expression<Func<T, bool>> criteria)
+        {
+            return await _dbSet.CountAsync(criteria);
+        }
+
+        public async Task<double> Sum(Expression<Func<T, double>> criteria)
+        {
+            return await _dbSet.SumAsync(criteria);
+        }
+
+        public Task<IEnumerable<T>> GetAllAsync(string includeProperties = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        
+    }
 }
