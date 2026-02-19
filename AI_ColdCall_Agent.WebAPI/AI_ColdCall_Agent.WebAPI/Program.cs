@@ -50,14 +50,31 @@ builder.Services.AddSwaggerGen(swagger =>
 });
 
 
+// Configure CORS to allow requests from any origin (you can customize this for production)
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowAll", policy =>
+	{
+		policy.AllowAnyOrigin()
+			  .AllowAnyMethod()
+			  .AllowAnyHeader();
+	});
+});
+
+
 var con = builder.Configuration.GetConnectionString("con");
 builder.Services.AddDbContext<AI_ColdCall_Agent_DbContext>(options => options.UseNpgsql(con));
 
 
 //Inject Services
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();  // inject BackgroundTaskQueue as a singleton for queuing
+builder.Services.AddHostedService<AIOutboundCallWorker>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<EmailSender>();   // inject EmailSender service
 builder.Services.AddTransient<IJWTService, JWTService>();  //inject JWTService
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -112,17 +129,23 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
 //if (!app.Environment.IsDevelopment())
 //{
 //	app.UseSwagger();
 //	app.UseSwaggerUI(c =>
 //	{
-//		c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-//		c.RoutePrefix = string.Empty; // Set to empty string to serve at root
+//		c.SwaggerEndpoint("/swagger/v1/swagger.json", "my api v1");
+//		c.RoutePrefix = string.Empty; // set to empty string to serve at root
 //	});
 //}
 
 app.UseHttpsRedirection();
+
+
+//Enable CORS
+app.UseRouting();
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -3,6 +3,7 @@ using System;
 using DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AI_ColdCall_Agent.Infrastructure.Migrations
 {
     [DbContext(typeof(AI_ColdCall_Agent_DbContext))]
-    partial class AI_ColdCall_Agent_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218164030_update-phone-number")]
+    partial class updatephonenumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,10 +265,6 @@ namespace AI_ColdCall_Agent.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CallId"));
-
-                    b.Property<string>("CallIDFromAI")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("CallOutcomeId")
                         .HasColumnType("integer");

@@ -39,4 +39,6 @@ public class CallLog
 
 	[Required, Range(0, int.MaxValue)]
 	public int RetryCount { get; set; }
+
+	public string CallIDFromAI { get; set; }
 }
