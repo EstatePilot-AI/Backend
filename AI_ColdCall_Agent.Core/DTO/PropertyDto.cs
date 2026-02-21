@@ -7,16 +7,16 @@ namespace DTO;
 public class PropertyDto
 {
       public int SellerContactId { get; set; }
-    public int PropertyTypeId { get; set; }
-    public int PropertyStatusId { get; set; }
+      public string PropertyType { get; set; }
+  
     public decimal Price { get; set; }
     public decimal Area { get; set; }
     public int Rooms { get; set; }
     public int Bathrooms { get; set; }
     public decimal DownPayment { get; set; }
-    public int PaymentMethodId { get; set; }
-    public int FinishingTypeId { get; set; }
-    public int ListingTypeId { get; set; }
+    public string PaymentMethod { get; set; }
+    public string FinishingType{ get; set; }
+    public string ListingType { get; set; }
     public string Description { get; set; }
 
 
@@ -30,14 +30,5 @@ public class PropertyDto
     public int FloorNumber { get; set; }
     public int ApartmentNumber { get; set; }
 
-
-}
-public class PropertyResponceDto
-{ public int PropertyId { get; set; }
-    public int PropertyTypeId { get; set; }
-    public int PropertyStatusId { get; set; }
-    public decimal Price { get; set; }
-    public decimal Area { get; set; }
-    public string Governorate { get; set; }
 
 }
