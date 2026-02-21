@@ -95,6 +95,78 @@ public class PropertyController : ControllerBase
 
         return Ok(propertyResponses);
     }
+    [HttpPost("CreateByAI")]
+    public async Task<IActionResult> CreateByAI([FromBody] PropertyDto propertyDto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
+        {
+
+            string pTypeName = propertyDto.PropertyType?.Trim() ?? string.Empty;
+            string fTypeName = propertyDto.FinishingType?.Trim() ?? string.Empty;
+            string lTypeName = propertyDto.ListingType?.Trim() ?? string.Empty;
+            string sTypeName = propertyDto.PaymentMethod?.Trim() ?? string.Empty;
+
+           
+            var pType = _unitOfWork.PropertyTypes.FindOneItem(t => t.Name == pTypeName);
+            var fType = _unitOfWork.FinishingTypes.FindOneItem(f => f.Name == fTypeName);
+            var lType = _unitOfWork.ListingTypes.FindOneItem(l => l.Name == lTypeName);
+            var sType = _unitOfWork.PaymentMethods.FindOneItem(m => m.Name == sTypeName);
+
+
+            var property = new Property
+            {
+                SellerContactId = propertyDto.SellerContactId,
+
+               
+                PropertyTypeId = pType?.Id ?? 1,
+                FinishingTypeId = fType?.Id ?? 1,
+                ListingTypeId = lType?.ListingTypeId ?? 1,
+                PropertyStatusId = 1, 
+                PaymentMethodId = sType?.Id ?? 1,
+
+                Price = propertyDto.Price,
+                Area = propertyDto.Area,
+                Rooms = propertyDto.Rooms,
+                Bathrooms = propertyDto.Bathrooms,
+                DownPayment = propertyDto.DownPayment,
+                Description = propertyDto.Description,
+               
+                PropertiesLocation = new PropertiesLocation
+                {
+                    Country = propertyDto.Country ?? "مصر",
+                    Governorate = propertyDto.Governorate,
+                    City = propertyDto.City,
+                    District = propertyDto.District,
+                    Street = propertyDto.Street,
+                    BuildingNumber = propertyDto.BuildingNumber,
+                    FloorNumber = propertyDto.FloorNumber,
+                    ApartmentNumber = propertyDto.ApartmentNumber
+                }
+            };
+
+           
+            await _unitOfWork.Properties.AddAsync(property);
+            _unitOfWork.Save();
+
+            return Ok(new
+            {
+                success = true,
+                message = "تم استلام بيانات الـ AI وحفظها بنجاح",
+                propertyId = property.PropertyId
+            });
+        }
+        catch (Exception ex)
+        {
+         
+            return StatusCode(500, new
+            {
+                error = "فشل في حفظ بيانات الـ AI",
+                details = ex.InnerException?.Message ?? ex.Message
+            });
+        }
+    }
 
     [HttpPut("UpdateProperty/{id}")]
     public async Task<IActionResult> UpdateProperty(int id, [FromBody] PropertyListDto propertyDto)
