@@ -27,7 +27,7 @@ namespace Repositories
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(string includeProperties = null)
         {
             return await _dbSet.ToListAsync();
         }
@@ -137,10 +137,7 @@ namespace Repositories
             return await _dbSet.SumAsync(criteria);
         }
 
-        public Task<IEnumerable<T>> GetAllAsync(string includeProperties = null)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         
     }
