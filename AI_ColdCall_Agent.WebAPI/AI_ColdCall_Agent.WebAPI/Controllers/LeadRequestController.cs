@@ -40,9 +40,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                     BuyerName = l.Contact?.Name ?? "عميل غير مسجل",
                     BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
                     StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار",
-                    StatusId = l.LeadRequestStatus?.Id ??0
-
-
+                  
                 }).ToList();
                
 
@@ -70,8 +68,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                     RequestId = l.RequestId,
                     BuyerName = l.Contact?.Name ?? "عميل غير مسجل",
                     BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
-                    StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار",
-                    StatusId = l.LeadRequestStatus?.Id??0
+                    StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار"
                 })
                 .ToList();
 

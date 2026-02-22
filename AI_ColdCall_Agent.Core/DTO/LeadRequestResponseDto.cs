@@ -10,7 +10,7 @@ namespace AI_ColdCall_Agent.Core.DTO
         public string BuyerName { get; set; }
         public string BuyerPhone { get; set; }
 
-        public int StatusId { get; set; }
+       
         public string StatusName { get; set; }
     }
 }
