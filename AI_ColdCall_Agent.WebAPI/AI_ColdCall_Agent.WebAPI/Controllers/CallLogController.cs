@@ -17,9 +17,14 @@ public class CallLogController : ControllerBase
 	}
 
 	[HttpGet("GetAllCallLogs")]
-	public async Task<IActionResult> GetAllCallLogs()
+	public async Task<IActionResult> GetAllCallLogs([FromQuery]int? callOutComeId)
 	{
 		var callLogs = await _unitOfWork.CallLogs.FindAllWithIncludeAsync(new string[] { "Contact", "CallOutcome", "SubjectTypeCall", "CallSessionState" });
+
+		if (callOutComeId.HasValue)
+		{
+			callLogs = callLogs.Where(cl => cl.CallOutcomeId == callOutComeId);
+		}
 
 		if(callLogs == null)
 		{
@@ -36,8 +41,9 @@ public class CallLogController : ControllerBase
 			CallOutcome = cl.CallOutcome.Name,
 			CallType = cl.SubjectTypeCall.Name,
 			CallSessionState = cl.CallSessionState.Name,
-			Duration=cl.Duration,
-			TimeStamp = GetTimeAgo(cl.Timestamp)
+			Duration = cl.Duration,
+			TimeStamp = GetTimeAgo(cl.Timestamp),
+			CallRecordingId = cl.CallIDFromAI
 		});
 
 		return Ok(callLogsDto);
@@ -74,7 +80,8 @@ public class CallLogController : ControllerBase
 			Summary = callLog.Transcript,
 			Duration = callLog.Duration,
 			RetryCount = callLog.RetryCount,
-			TimeStamp = callLog.Timestamp
+			TimeStamp = callLog.Timestamp,
+			CallRecordingId = callLog.CallIDFromAI
 		};
 
 		return Ok(callLogDto);

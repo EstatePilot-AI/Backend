@@ -15,4 +15,5 @@ public class CallLogDto
 	public int Duration { get; set; }
 	public int RetryCount { get; set; }
 	public DateTime TimeStamp { get; set; }
+	public string CallRecordingId { get; set; }
 }
