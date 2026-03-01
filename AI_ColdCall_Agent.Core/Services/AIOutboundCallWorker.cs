@@ -121,6 +121,6 @@ public class AIOutboundCallWorker : BackgroundService
 			}
 		};
 
-		await client.PostAsJsonAsync("https://uncrumbled-ena-unmouthable.ngrok-free.dev/api/v1/call", requestbody);
+		await client.PostAsJsonAsync("https://call-handler.vercel.app/api/v1/call", requestbody);
 	}
 }

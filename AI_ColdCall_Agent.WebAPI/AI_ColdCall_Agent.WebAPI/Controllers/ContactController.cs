@@ -46,6 +46,20 @@ public class ContactController : ControllerBase
 
 			if (existingContact != null)
 			{
+				// check if the existing contact already has a lead request for the same property
+				var existingLeadRequest = (await _unitOfWork.LeadRequests.FindAllAsync(lr => lr.BuyerContactId == existingContact.ContactId && lr.PropertyId == property.PropertyId)).FirstOrDefault();
+
+				if (existingLeadRequest != null)
+				{
+					return Conflict(new
+					{
+						Message = "You have already submitted an interest request for this property.",
+						LeadRequestId= existingLeadRequest.RequestId
+					});
+				}
+				
+				existingContact.Name= contactDto.Name; // update name
+				existingContact.Email= contactDto.Email; // update email
 				existingContact.ContactStatusId = 1; // if the contact is existing into system return the status to pending_call
 			}
 			else

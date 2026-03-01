@@ -18,8 +18,7 @@ public class Contact
 	public string Name { get; set; }
 
 	[Required]
-	[RegularExpression(@"^(\+2)?01[0125][0-9]{8}$", ErrorMessage = "Phone number must be a valid Egyptian mobile number")]
-	public string Phone { get; set; }
+	[RegularExpression(@"^\+201[0125][0-9]{8}$", ErrorMessage = "Phone number must start with +2 followed by a valid Egyptian mobile number")] public string Phone { get; set; }
 
 	[EmailAddress(ErrorMessage = "Email should be in a proper email address format")]
 	public string Email { get; set; }
