@@ -16,6 +16,9 @@ public class CallLog
 	public int ContactId { get; set; }
 	public Contact Contact { get; set; }
 
+	[Required]
+	public string ContactName { get; set; }
+
 	[Required, ForeignKey("CallOutcome")]
 	public int CallOutcomeId { get; set; }
 	public CallOutcome CallOutcome { get; set; }

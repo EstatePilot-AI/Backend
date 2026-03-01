@@ -1,5 +1,6 @@
 ﻿using DTO;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,13 +38,12 @@ public class CallLogController : ControllerBase
 		var callLogsDto = callLogs.Select(cl => new
 		{
 			CallId = cl.CallId,
-			BuyerName = cl.Contact.Name,
+			BuyerName = cl.ContactName,
 			CallOutcome = cl.CallOutcome.Name,
 			CallType = cl.SubjectTypeCall.Name,
 			CallSessionState = cl.CallSessionState.Name,
 			Duration = cl.Duration,
-			TimeStamp = GetTimeAgo(cl.Timestamp),
-			CallRecordingId = cl.CallIDFromAI
+			TimeStamp = GetTimeAgo(cl.Timestamp)
 		});
 
 		return Ok(callLogsDto);
@@ -73,15 +73,15 @@ public class CallLogController : ControllerBase
 		var callLogDto = new CallLogDto
 		{
 			CallId = callLog.CallId,
-			BuyerName = callLog.Contact.Name,
+			BuyerName = callLog.ContactName,
 			CallOutcome = callLog.CallOutcome.Name,
 			CallType = callLog.SubjectTypeCall.Name,
 			CallSessionState = callLog.CallSessionState.Name,
+			CallRecordingId = callLog.CallIDFromAI,
 			Summary = callLog.Transcript,
 			Duration = callLog.Duration,
 			RetryCount = callLog.RetryCount,
 			TimeStamp = callLog.Timestamp,
-			CallRecordingId = callLog.CallIDFromAI
 		};
 
 		return Ok(callLogDto);
@@ -117,5 +117,39 @@ public class CallLogController : ControllerBase
 		// Fallback for older dates (e.g., "Oct 24")
 		return date.ToString("MMM dd");
 	}
+
+
+	[Authorize(Roles = "superadmin")]
+	[HttpDelete("DeleteAllCallLogs")]
+	public async Task<IActionResult> DeleteAllCallLogs()
+	{
+		var callLogs = await _unitOfWork.CallLogs.GetAllAsync();
+
+		if (callLogs == null)
+		{
+			return NotFound(new
+			{
+				status = "error",
+				error = new
+				{
+					message = "No call logs found to delete."
+				}
+			});
+		}
+
+		foreach(var callLog in callLogs)
+		{
+			_unitOfWork.CallLogs.Delete(callLog);
+		}
+
+		_unitOfWork.Save();
+
+		return Ok(new
+		{
+			status = "success",
+			message = "All call logs have been deleted successfully."
+		});
+	}
+
 }
 

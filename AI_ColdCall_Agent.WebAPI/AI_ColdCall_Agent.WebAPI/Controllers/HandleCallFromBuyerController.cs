@@ -57,6 +57,7 @@ public class HandleCallFromBuyerController : ControllerBase
 			var callLog = new CallLog
 			{
 				ContactId = leadRequest.BuyerContactId,
+				ContactName = resultDto.ContactName,
 				SubjectTypeId = 1, //buy
 				Transcript = resultDto.summary,
 				Timestamp = DateTime.UtcNow,

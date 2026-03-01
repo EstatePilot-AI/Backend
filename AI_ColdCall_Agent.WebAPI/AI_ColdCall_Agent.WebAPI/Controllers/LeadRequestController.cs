@@ -1,5 +1,6 @@
 ﻿using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,7 +38,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                 .Select(l => new LeadRequestResponseDto
                 {
                     RequestId = l.RequestId,
-                    BuyerName = l.Contact?.Name ?? "عميل غير مسجل",
+                    BuyerName = l.BuyerName ?? "عميل غير مسجل",
                     BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
                     StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار",
                   
@@ -66,7 +67,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                 .Select(l => new LeadRequestResponseDto
                 {
                     RequestId = l.RequestId,
-                    BuyerName = l.Contact?.Name ?? "عميل غير مسجل",
+                    BuyerName = l.BuyerName ?? "عميل غير مسجل",
                     BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
                     StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار"
                 })
@@ -101,6 +102,37 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             return Ok(response);
         }
 
+		[Authorize(Roles = "superadmin")]
+		[HttpDelete("DeleteAllLeads")]
+        public async Task<IActionResult> DeleteAllLeads()
+        {
+            var leads=await _unitOfWork.LeadRequests.GetAllAsync();
 
-    }
+            if (leads == null)
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    error = new
+                    {
+                        message = "No leads found to delete."
+                    }
+                });
+			}
+
+            foreach(var lead in leads)
+            {
+                _unitOfWork.LeadRequests.Delete(lead);
+            }
+
+            _unitOfWork.Save();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "All leads have been deleted successfully."
+            });
+		}
+
+	}
 }
