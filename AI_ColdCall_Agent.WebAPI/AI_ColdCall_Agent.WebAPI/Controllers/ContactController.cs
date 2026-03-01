@@ -83,6 +83,7 @@ public class ContactController : ControllerBase
 			var leadRequest = new LeadRequest()
 			{
 				BuyerContactId = existingContact.ContactId,
+				BuyerName= existingContact.Name,
 				PropertyId = id,
 				LeadRequestStatusId = 1 //1 for Pending Call
 			};
