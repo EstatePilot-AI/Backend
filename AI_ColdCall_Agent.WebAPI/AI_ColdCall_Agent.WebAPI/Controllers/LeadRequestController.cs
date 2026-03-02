@@ -102,5 +102,54 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
         }
 
 
+        [HttpGet("GetLeadRequestById/{id}")]
+        public async Task<IActionResult> GetLeadRequestById(int id)
+        {
+            
+            var includes = new string[]
+            {
+        "Contact",               
+        "LeadRequestStatus",    
+        "Property",             
+        "Property.Contact",      
+        "Property.PropertyType", 
+        "Property.PropertiesLocation" 
+            };
+
+            var lead = await _unitOfWork.LeadRequests.GetFirstOrDefaultWithStringsAsync(
+                l => l.RequestId == id,
+                includes
+            );
+
+            if (lead == null)
+            {
+                
+                return NotFound(new { message = $"Lead request with ID {id} was not found." });
+            }
+
+            var response = new LeadRequestDto
+            {
+                RequestId = lead.RequestId,
+                BuyerName = lead.Contact?.Name ?? "غير مسجل",
+                BuyerPhone = lead.Contact?.Phone ?? "لا يوجد رقم",
+
+             
+                SellerName = lead.Property?.Contact?.Name ?? "غير محدد",
+                SellerPhone = lead.Property?.Contact?.Phone ?? "غير محدد",
+
+                PropertyId = lead.Property?.PropertyId ?? 0,
+                Price = lead.Property?.Price ?? 0,
+                Area = lead.Property?.Area ?? 0,
+
+                Location = lead.Property?.PropertiesLocation?.City ?? "غير محدد",
+
+         
+                PropertyType = lead.Property?.PropertyType?.Name ?? "غير محدد",
+
+                StatusName = lead.LeadRequestStatus?.Name ?? "قيد الانتظار"
+            };
+
+            return Ok(response);
+        }
     }
 }

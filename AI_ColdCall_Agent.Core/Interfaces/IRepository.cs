@@ -28,4 +28,6 @@ public interface IRepository<T> where T : class
 	
 	Task<int> Count(Expression<Func<T, bool>> criteria);
 	Task<double> Sum(Expression<Func<T, double>> criteria);
+    // أضيفي هذا السطر داخل ملف IRepository
+    Task<T> GetFirstOrDefaultWithStringsAsync(Expression<Func<T, bool>> criteria, string[] includes = null);
 }

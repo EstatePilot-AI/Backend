@@ -137,8 +137,18 @@ namespace Repositories
             return await _dbSet.SumAsync(criteria);
         }
 
-       
+        public async Task<T> GetFirstOrDefaultWithStringsAsync(Expression<Func<T, bool>> criteria, string[] includes = null)
+        {
+            IQueryable<T> query = _dbSet;
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            return await query.FirstOrDefaultAsync(criteria);
+        }
 
-        
     }
 }
