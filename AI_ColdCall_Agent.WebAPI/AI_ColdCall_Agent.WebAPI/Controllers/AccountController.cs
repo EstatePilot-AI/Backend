@@ -368,8 +368,29 @@ public class AccountController : ControllerBase
 		return Ok(userDto);
 	}
 
+	[Authorize]
+	[HttpGet("GetMyProfile")]
+	public async Task<IActionResult> GetMyProfile()
+	{
+		var user = await _userManager.GetUserAsync(User);
+		if (user == null)
+		{
+			return NotFound("User not found.");
+		}
 
-	[HttpGet("Logout")]
+		var userDto = new UserDto
+		{
+			Id = user.Id,
+			Name = user.Name,
+			Email = user.Email!,
+			PhoneNumber = user.PhoneNumber!,
+			Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()!
+		};
+
+		return Ok(userDto);
+	}
+
+	[HttpPost("Logout")]
 	public async Task<IActionResult> Logout()
 	{
 		await _signInManager.SignOutAsync();

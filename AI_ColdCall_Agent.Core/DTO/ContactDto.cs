@@ -11,9 +11,7 @@ public class ContactDto
 	public string Name { get; set; }
 
 	[Required]
-	[RegularExpression(@"^(\+20)?(010|011|012|015)[0-9]{8}$", ErrorMessage = "Phone number must be a valid Egyptian mobile number")]
-	public string Phone { get; set; }
-
+	[RegularExpression(@"^\+201[0125][0-9]{8}$", ErrorMessage = "Phone number must start with +2 followed by a valid Egyptian mobile number")] public string Phone { get; set; }
 	[Required]
 	[EmailAddress(ErrorMessage = "Email should be in a proper email address format")]
 	public string Email { get; set; }

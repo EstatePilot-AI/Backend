@@ -15,6 +15,9 @@ public class LeadRequest
 	public int BuyerContactId { get; set; }
 	public Contact Contact { get; set; }
 
+	[Required]
+	public string BuyerName { get; set; }
+
 	[Required, ForeignKey("Property")]
 	public int PropertyId { get; set; }
 	public Property Property { get; set; }

@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using DTO;
 using Interfaces;
+using IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -14,10 +15,12 @@ namespace Controllers;
 public class ContactController : ControllerBase
 {
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IBackgroundTaskQueue _queue;
 
-	public ContactController(IUnitOfWork unitOfWork)
+	public ContactController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue)
 	{
 		_unitOfWork = unitOfWork;
+		_queue = queue;
 	}
 
 	//Add and new contact to a buyer and add leadRequest by using buyerId and propertyId comes from the shop
@@ -36,21 +39,51 @@ public class ContactController : ControllerBase
 			{
 				return NotFound("Property not found.");
 			}
-			var contact = new Contact()
-			{
-				Name = contactDto.Name,
-				Phone = contactDto.Phone,
-				Email = contactDto.Email,
-				ContactTypeId = 1,  //1 for buyer
-				ContactStatusId = 1 //1 for pending_call
-			};
 
-			await _unitOfWork.Contacts.AddAsync(contact); //store contact for buyer
+			var contact = new Contact();
+
+			var existingContact = _unitOfWork.Contacts.FindOneItem(c => c.Phone == contactDto.Phone && c.ContactTypeId == 1); // check if the contact already exists for buyer
+
+			if (existingContact != null)
+			{
+				// check if the existing contact already has a lead request for the same property
+				var existingLeadRequest = (await _unitOfWork.LeadRequests.FindAllAsync(lr => lr.BuyerContactId == existingContact.ContactId && lr.PropertyId == property.PropertyId)).FirstOrDefault();
+
+				if (existingLeadRequest != null)
+				{
+					return Conflict(new
+					{
+						Message = "You have already submitted an interest request for this property.",
+						LeadRequestId= existingLeadRequest.RequestId
+					});
+				}
+				
+				existingContact.Name= contactDto.Name; // update name
+				existingContact.Email= contactDto.Email; // update email
+				existingContact.ContactStatusId = 1; // if the contact is existing into system return the status to pending_call
+			}
+			else
+			{
+				contact = new Contact()
+				{
+					Name = contactDto.Name,
+					Phone = contactDto.Phone,
+					Email = contactDto.Email,
+					ContactTypeId = 1,  //1 for buyer
+					ContactStatusId = 1 //1 for pending_call
+				};
+
+				await _unitOfWork.Contacts.AddAsync(contact); //store contact for buyer
+
+				existingContact = contact; // for leadRequest creation
+			}
+				
 			_unitOfWork.Save();
 
 			var leadRequest = new LeadRequest()
 			{
-				BuyerContactId = contact.ContactId,
+				BuyerContactId = existingContact.ContactId,
+				BuyerName= existingContact.Name,
 				PropertyId = id,
 				LeadRequestStatusId = 1 //1 for Pending Call
 			};
@@ -58,10 +91,13 @@ public class ContactController : ControllerBase
 			await _unitOfWork.LeadRequests.AddAsync(leadRequest); //store leadRequest
 			_unitOfWork.Save();
 
+			//Add requestId to the queue
+			await _queue.QueueCallAsync(leadRequest.RequestId);
+
 			return Ok(new
 			{
 				Message = "Contact and Lead Request added successfully",
-				BuyerContactId = contact.ContactId,
+				BuyerContactId = existingContact.ContactId,
 				LeadRequestId = leadRequest.RequestId
 			});
 		}
