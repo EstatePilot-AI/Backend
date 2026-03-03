@@ -62,7 +62,7 @@ public class HandleCallFromBuyerController : ControllerBase
 				Transcript = resultDto.summary,
 				Timestamp = DateTime.UtcNow,
 				Duration = (int)Math.Floor(resultDto.Duration),
-				RetryCount = resultDto.CallOutcome.ToLower() == "notanswer" ? currentRetryCount+1 : currentRetryCount,
+				RetryCount = currentRetryCount,
 				CallIDFromAI = resultDto.callId
 			};
 
@@ -96,18 +96,17 @@ public class HandleCallFromBuyerController : ControllerBase
 							callLog.CallSessionStateId = 2; //Not Answered
 							callLog.CallOutcomeId = 3; // Not Answered
 
-							if (currentRetryCount >= 2) //retry count for 3 times only
+							callLog.RetryCount = currentRetryCount + 1; //increment the retry count for the next call log entry
+
+							if (currentRetryCount >= 3) //retry count for 3 times only
 							{
 								leadRequest.LeadRequestStatusId = 7; //Invalid Number or failed to reach
 							}
 							else
 							{
 								leadRequest.LeadRequestStatusId = 6; //Retry pending
+								await _queue.QueueCallAsync(leadRequest.RequestId);
 							}
-
-							_unitOfWork.Save();
-
-							await _queue.QueueCallAsync(leadRequest.RequestId);
 							break;
 						}
 					case "failed":
@@ -115,6 +114,8 @@ public class HandleCallFromBuyerController : ControllerBase
 							callLog.CallSessionStateId = 2;//Not Answered
 							callLog.CallOutcomeId = 4; // Failed
 							leadRequest.LeadRequestStatusId = 7; //Invalid Number
+
+							_unitOfWork.Contacts.Delete(buyerContact);  //delete contact if the call is failed
 							break;
 						}
 				}
