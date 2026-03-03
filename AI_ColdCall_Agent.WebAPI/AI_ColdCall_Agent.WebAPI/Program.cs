@@ -69,6 +69,7 @@ builder.Services.AddDbContext<AI_ColdCall_Agent_DbContext>(options => options.Us
 //Inject Services
 builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();  // inject BackgroundTaskQueue as a singleton for queuing
 builder.Services.AddHostedService<AIOutboundCallWorker>();
+builder.Services.AddHostedService<AISellerCallWorker>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<EmailSender>();   // inject EmailSender service

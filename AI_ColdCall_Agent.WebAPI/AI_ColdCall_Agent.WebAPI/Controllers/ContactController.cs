@@ -205,6 +205,14 @@ public class ContactController : ControllerBase
 
 			_unitOfWork.Save(); //save all new sellers int DB
 
+			//Trigger the first call only
+			var firstSeller=(await _unitOfWork.Contacts.FindAllAsync(c=>c.ContactTypeId==2 && c.ContactStatusId==1)).OrderBy(c=>c.ContactId).FirstOrDefault();
+
+			if(firstSeller != null)
+			{
+				await _queue.QueueCallAsync(firstSeller.ContactId);
+			}
+
 			return Ok(new
 			{
 				TotalRead = allRecords.Count(),
