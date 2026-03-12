@@ -1,10 +1,13 @@
 ﻿using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Interfaces;
+using IServices;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using RestSharp.Extensions;
+using Services;
 
 namespace Controllers;
 
@@ -14,12 +17,15 @@ namespace Controllers;
 public class PropertyController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+	private readonly IBackgroundTaskQueue _queue;
+	private readonly EmailSender _emailSender;
 
-
-    public PropertyController(IUnitOfWork unitOfWork)
+	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender)
     {
         _unitOfWork = unitOfWork;
-    }
+		_queue = queue;
+		_emailSender = emailSender;
+	}
 
     [HttpGet("GetPropertyById/{id}")]
     public async Task<IActionResult> GetPropertyById(int id)
@@ -96,71 +102,166 @@ public class PropertyController : ControllerBase
         return Ok(propertyResponses);
     }
     [HttpPost("CreateByAI")]
-    public async Task<IActionResult> CreateByAI([FromBody] PropertyDto propertyDto)
+    public async Task<IActionResult> CreateByAI([FromBody] AICallResultFromSeller resultDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         try
         {
+            var sellerContact = await _unitOfWork.Contacts.GetByIdAsync(int.Parse(resultDto.LeadID));
 
-            string pTypeName = propertyDto.PropertyType?.Trim() ?? string.Empty;
-            string fTypeName = propertyDto.FinishingType?.Trim() ?? string.Empty;
-            string lTypeName = propertyDto.ListingType?.Trim() ?? string.Empty;
-            string sTypeName = propertyDto.PaymentMethod?.Trim() ?? string.Empty;
+			if (sellerContact == null)
+			{
+				return NotFound(new
+				{
+					status = "error",
+					error = new
+					{
+						message = $"Seller with ID {resultDto.LeadID} not found."
+					}
+				});
+			}
 
-           
-            var pType = _unitOfWork.PropertyTypes.FindOneItem(t => t.Name == pTypeName);
-            var fType = _unitOfWork.FinishingTypes.FindOneItem(f => f.Name == fTypeName);
-            var lType = _unitOfWork.ListingTypes.FindOneItem(l => l.Name == lTypeName);
-            var sType = _unitOfWork.PaymentMethods.FindOneItem(m => m.Name == sTypeName);
+			//To get the retryCount for the current call by counting the previous call logs for the same buyer
+			var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == sellerContact.ContactId)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
+
+			int currentRetryCount = callLogForSameBuyer?.RetryCount ?? 0;
+
+			var callLog = new CallLog
+			{
+				ContactId = sellerContact.ContactId,
+				ContactName = resultDto.ContactName,
+				SubjectTypeId = 1, //buy
+				Transcript = resultDto.Summary,
+				Timestamp = DateTime.UtcNow,
+				Duration = (int)Math.Floor(resultDto.Duration),
+				RetryCount = currentRetryCount,
+				CallIDFromAI = resultDto.CallId
+			};
+
+			switch (resultDto.CallOutcome.ToLower())
+			{
+				case "interested":
+					{
+						callLog.CallSessionStateId = 1; //Answered
+						callLog.CallOutcomeId = 1; // Interested
+
+                        // Logic to add the property
+                        string pTypeName = resultDto.propertyDTO.PropertyInfo.PropertyType?.Trim() ?? string.Empty;
+                        string fTypeName = resultDto.propertyDTO.PropertyInfo.FinishingType?.Trim() ?? string.Empty;
+                        string lTypeName = resultDto.propertyDTO.PropertyPayment.ListingType?.Trim() ?? string.Empty;
+                        string sTypeName = resultDto.propertyDTO.PropertyPayment.PaymentMethod?.Trim() ?? string.Empty;
 
 
-            var property = new Property
-            {
-                SellerContactId = propertyDto.SellerContactId,
+                        var pType = _unitOfWork.PropertyTypes.FindOneItem(t => t.Name.ToLower() == pTypeName.ToLower());
+                        var fType = _unitOfWork.FinishingTypes.FindOneItem(f => f.Name.ToLower() == fTypeName.ToLower());
+                        var lType = _unitOfWork.ListingTypes.FindOneItem(l => l.Name.ToLower() == lTypeName.ToLower());
+                        var sType = _unitOfWork.PaymentMethods.FindOneItem(m => m.Name.ToLower() == sTypeName.ToLower());
 
-               
-                PropertyTypeId = pType?.Id ?? 1,
-                FinishingTypeId = fType?.Id ?? 1,
-                ListingTypeId = lType?.ListingTypeId ?? 1,
-                PropertyStatusId = 1, 
-                PaymentMethodId = sType?.Id ?? 1,
+                        var property = new Property
+                        {
+                            SellerContactId = sellerContact.ContactId,
 
-                Price = propertyDto.Price,
-                Area = propertyDto.Area,
-                Rooms = propertyDto.Rooms,
-                Bathrooms = propertyDto.Bathrooms,
-                DownPayment = propertyDto.DownPayment,
-                Description = propertyDto.Description,
-               
-                PropertiesLocation = new PropertiesLocation
-                {
-                    Country = propertyDto.Country ?? "مصر",
-                    Governorate = propertyDto.Governorate,
-                    City = propertyDto.City,
-                    District = propertyDto.District,
-                    Street = propertyDto.Street,
-                    BuildingNumber = propertyDto.BuildingNumber,
-                    FloorNumber = propertyDto.FloorNumber,
-                    ApartmentNumber = propertyDto.ApartmentNumber
-                }
-            };
+                            PropertyTypeId = pType?.Id ?? 1,
+                            FinishingTypeId = fType?.Id ?? 1,
+                            ListingTypeId = lType?.ListingTypeId ?? 1,
+                            PropertyStatusId = 1,
+                            PaymentMethodId = sType?.Id ?? 1,
 
-           
-            await _unitOfWork.Properties.AddAsync(property);
-            _unitOfWork.Save();
+                            Negotiable= resultDto.propertyDTO.PropertyInfo.Negotiable,
 
-            return Ok(new
-            {
-                success = true,
-                message = "تم استلام بيانات الـ AI وحفظها بنجاح",
-                propertyId = property.PropertyId
-            });
-        }
+							Price = resultDto.propertyDTO.PropertyInfo.Price,
+                            Area = resultDto.propertyDTO.PropertyInfo.Area,
+                            Rooms = resultDto.propertyDTO.PropertyInfo.Rooms,
+                            Bathrooms = resultDto.propertyDTO.PropertyInfo.Bathrooms,
+                            DownPayment = resultDto.propertyDTO.PropertyPayment.DownPayment,
+                            Description = resultDto.propertyDTO.PropertyInfo.AdditionalInfo,
+
+                            PropertiesLocation = new PropertiesLocation
+                            {
+                                Country = resultDto.propertyDTO.PropertyLocation.Country ?? "مصر",
+                                Governorate = resultDto.propertyDTO.PropertyLocation.Governorate ?? "",
+                                City = resultDto.propertyDTO.PropertyLocation.City ?? "",
+                                District = resultDto.propertyDTO.PropertyLocation.District ?? "",
+                                Street = resultDto.propertyDTO.PropertyLocation.Street ?? "",
+                                BuildingNumber = resultDto.propertyDTO.PropertyLocation.BuildingNumber,
+                                FloorNumber = resultDto.propertyDTO.PropertyLocation.FloorNumber,
+                                ApartmentNumber = resultDto.propertyDTO.PropertyLocation.ApartmentNumber
+                            }
+                        };
+
+						await _unitOfWork.Properties.AddAsync(property);
+                        _unitOfWork.Save();
+
+						//send email to notify the seller that the seller's property is added successfully
+                        var message=HTMLMessages.ConfirmationEmailToSeller(property.PropertyId);
+                        var subject = "Success: Your Property Has Been Added Successfully";
+                        _emailSender.SendEmail(subject, sellerContact.Email, message);
+
+						sellerContact.ContactStatusId = 2; //Qualified
+						break;
+					}
+				case "notinterested":
+					{
+						callLog.CallSessionStateId = 1; //Answered
+						callLog.CallOutcomeId = 2; // Not InterestedleadRequest.LeadRequestStatusId = 5; //Not interested
+						sellerContact.ContactStatusId = 4; //Not Interested
+						break;
+					}
+				case "noanswer":
+				case "busy":
+					{
+						callLog.CallSessionStateId = 2; //Not Answered
+						callLog.CallOutcomeId = 3; // Not Answered
+
+						callLog.RetryCount = currentRetryCount + 1; //increment the retry count for the next call log entry
+
+						if (currentRetryCount >= 3) //retry count for 3 times only
+						{
+                            _unitOfWork.Contacts.Delete(sellerContact);  //delete Invalid Number or failed to reach
+						}
+						else
+						{
+                            sellerContact.ContactStatusId = 5; //Retry pending
+							await _queue.QueueCallAsync(sellerContact.ContactId);
+						}
+						break;
+					}
+				case "failed":
+					{
+						callLog.CallSessionStateId = 2;//Not Answered
+						callLog.CallOutcomeId = 4; // Failed
+
+						_unitOfWork.Contacts.Delete(sellerContact);  //delete contact if the call is failed
+						break;
+					}
+			}
+            await _unitOfWork.CallLogs.AddAsync(callLog);
+			_unitOfWork.Save();
+
+            //find the next available seller and enqueue it for calling
+            //enable the worker to call when The AI is ready to the next call
+
+            var nextSeller = await _unitOfWork.Contacts.GetFirstOrDefaultWithStringsAsync(c => c.ContactStatusId == 1 || c.ContactStatusId == 5);
+
+			if (nextSeller != null)
+			{
+				await _queue.QueueCallAsync(nextSeller.ContactId);
+			}
+
+			return Ok(new
+			{
+				status = "success",
+				data = new
+				{
+					message = "Outcome processed and property added successfully"
+				}
+			});
+		}
         catch (Exception ex)
         {
-         
-            return StatusCode(500, new
+
+            return BadRequest(new
             {
                 error = "فشل في حفظ بيانات الـ AI",
                 details = ex.InnerException?.Message ?? ex.Message
