@@ -31,13 +31,27 @@ public class ContactController : ControllerBase
 		{
 			if (id <= 0)
 			{
-				return BadRequest("Invalid buyer ID.");
+				return BadRequest(new
+				{
+					status = "error",
+					error = new
+					{
+						message = "Invalid buyer Id"
+					}
+				});
 			}
 			var property = await _unitOfWork.Properties.GetByIdAsync(id);
 
 			if (property == null) // check if property exists
 			{
-				return NotFound("Property not found.");
+				return NotFound(new
+				{
+					status = "error",
+					error = new
+					{
+						message = "Property not found"
+					}
+				});
 			}
 
 			var contact = new Contact();
@@ -51,8 +65,9 @@ public class ContactController : ControllerBase
 
 				if (existingLeadRequest != null)
 				{
-					return Conflict(new
+					return BadRequest(new
 					{
+						status = "error",
 						Message = "You have already submitted an interest request for this property.",
 						LeadRequestId= existingLeadRequest.RequestId
 					});
@@ -96,6 +111,7 @@ public class ContactController : ControllerBase
 
 			return Ok(new
 			{
+				Status = "success",
 				Message = "Contact and Lead Request added successfully",
 				BuyerContactId = existingContact.ContactId,
 				LeadRequestId = leadRequest.RequestId
