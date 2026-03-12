@@ -150,6 +150,69 @@ public class CallLogController : ControllerBase
 			message = "All call logs have been deleted successfully."
 		});
 	}
+    [HttpGet("GetCallLogsCountWithDetails")]
+    public async Task<IActionResult> GetCallLogsCountWithDetails(int? day, int? month, int? year, string outcome = null)
+    {
+       
+        var allLogs = await _unitOfWork.CallLogs.GetAllWithIncludesAsync(
+            c => c.CallOutcome,
+            c => c.SubjectTypeCall,
+            c => c.CallSessionState
+        );
+
+       
+        var availableStatuses = allLogs
+                                .Where(c => c.CallOutcome != null)
+                                .Select(c => c.CallOutcome.Name)
+                                .Distinct()
+                                .ToList();
+
+        var filteredQuery = allLogs.AsQueryable();
+
+        if (year.HasValue && year > 0)
+            filteredQuery = filteredQuery.Where(c => c.Timestamp.Year == year);
+
+        if (month.HasValue && month > 0)
+            filteredQuery = filteredQuery.Where(c => c.Timestamp.Month == month);
+
+        if (day.HasValue && day > 0)
+            filteredQuery = filteredQuery.Where(c => c.Timestamp.Day == day);
+
+    
+        if (!string.IsNullOrWhiteSpace(outcome) && outcome.ToLower() != "all")
+        {
+            
+            filteredQuery = filteredQuery.Where(c => c.CallOutcome != null &&
+                                                     c.CallOutcome.Name.Trim().ToLower() == outcome.Trim().ToLower());
+        }
+
+     
+        var filteredList = filteredQuery.ToList();
+
+        var details = filteredList.Select(cl => new
+        {
+            cl.CallId,
+            cl.ContactName,
+            Outcome = cl.CallOutcome?.Name ?? "N/A",
+            Type = cl.SubjectTypeCall?.Name ?? "N/A",
+            Status = cl.CallSessionState?.Name ?? "N/A",
+            cl.Duration,
+            ExactTime = cl.Timestamp.ToString("yyyy-MM-dd"),
+            
+        }).ToList();
+
+        return Ok(new
+        {
+            AvailableStatuses = availableStatuses,
+            TotalCount = details.Count, 
+            FilterApplied = new
+            {
+               
+                Status = string.IsNullOrWhiteSpace(outcome) ? "All" : outcome
+            },
+            Data = details 
+        });
+    }
 
 }
 
