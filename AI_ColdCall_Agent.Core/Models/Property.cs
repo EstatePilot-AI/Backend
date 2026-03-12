@@ -52,8 +52,10 @@ public class Property
 
 	public string Description { get; set; }
 
+	public bool Negotiable { get; set; }
+
 	// 1-to-1 with Location
-	
-    public virtual PropertiesLocation PropertiesLocation { get; set; }
+
+	public virtual PropertiesLocation PropertiesLocation { get; set; }
 
 }

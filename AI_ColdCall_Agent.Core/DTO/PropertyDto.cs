@@ -7,17 +7,17 @@ namespace DTO;
 public class PropertyDto
 {
       public int SellerContactId { get; set; }
-      public string PropertyType { get; set; }
+      public string PropertyType { get; set; } // شقة , فيلا , ستوديو,شاليه
   
     public decimal Price { get; set; }
     public decimal Area { get; set; }
     public int Rooms { get; set; }
     public int Bathrooms { get; set; }
-    public decimal DownPayment { get; set; }
-    public string PaymentMethod { get; set; }
-    public string FinishingType{ get; set; }
-    public string ListingType { get; set; }
-    public string Description { get; set; }
+    public decimal DownPayment { get; set; } 
+    public string PaymentMethod { get; set; } // كاش , تقسيط
+	public string FinishingType{ get; set; } //بدون تشطيب, نصف تشطيب,تشطيب كامل,سوبر لوكس
+	public string ListingType { get; set; } // للبيع , للإيجار
+	public string Description { get; set; }
 
 
     // Properties from PropertiesLocation
