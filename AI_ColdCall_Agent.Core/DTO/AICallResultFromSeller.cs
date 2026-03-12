@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace DTO;
@@ -13,14 +14,14 @@ public class AICallResultFromSeller
 	public double Duration { get; set; }
 	public string CallOutcome { get; set; } //Interested, notInterested, noAnswer or busy
 
-	public PropertyDTO propertyDTO { get; set; }
+	public PropertyDTO? propertyDTO { get; set; }
 }
 
 public class PropertyDTO
 {
-	public PropertyInfoDto PropertyInfo { get; set; }
-	public PropertyPaymentDto PropertyPayment { get; set; }
-	public PropertyLocationDto PropertyLocation { get; set; }
+	public PropertyInfoDto? PropertyInfo { get; set; }
+	public PropertyPaymentDto? PropertyPayment { get; set; }
+	public PropertyLocationDto? PropertyLocation { get; set; }
 }
 
 public class PropertyInfoDto
@@ -32,7 +33,9 @@ public class PropertyInfoDto
 	public int Bathrooms { get; set; }
 
 	public string FinishingType { get; set; }  // Options: Without Finishing, Semi-Finished, Fully Finished, Super Lux
-	public bool Negotiable { get; set; }
+
+	[DefaultValue(false)]
+	public bool Negotiable { get; set; } = false;
 	public string AdditionalInfo { get; set; }
 }
 

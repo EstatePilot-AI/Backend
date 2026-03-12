@@ -101,8 +101,8 @@ public class PropertyController : ControllerBase
 
         return Ok(propertyResponses);
     }
-    [HttpPost("CreateByAI")]
-    public async Task<IActionResult> CreateByAI([FromBody] AICallResultFromSeller resultDto)
+    [HttpPost("HandleCallOutcomeFromSeller")]
+    public async Task<IActionResult> HandleCallOutcomeFromSeller([FromBody] AICallResultFromSeller resultDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
