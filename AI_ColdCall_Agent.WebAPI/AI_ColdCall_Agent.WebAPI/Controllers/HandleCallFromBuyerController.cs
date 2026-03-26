@@ -58,7 +58,7 @@ public class HandleCallFromBuyerController : ControllerBase
 			{
 				ContactId = leadRequest.BuyerContactId,
 				ContactName = resultDto.ContactName,
-				SubjectTypeId = 1, //buy
+				SubjectTypeId = 1, //sales
 				Transcript = resultDto.summary,
 				Timestamp = DateTime.UtcNow,
 				Duration = (int)Math.Floor(resultDto.Duration),
@@ -101,6 +101,8 @@ public class HandleCallFromBuyerController : ControllerBase
 							if (currentRetryCount >= 3) //retry count for 3 times only
 							{
 								leadRequest.LeadRequestStatusId = 7; //Invalid Number or failed to reach
+																	 //_unitOfWork.Contacts.Delete(buyerContact);  //delete contact if the call is failed
+								callLog.CallOutcomeId = 4; // Failed
 							}
 							else
 							{
@@ -115,7 +117,7 @@ public class HandleCallFromBuyerController : ControllerBase
 							callLog.CallOutcomeId = 4; // Failed
 							leadRequest.LeadRequestStatusId = 7; //Invalid Number
 
-							_unitOfWork.Contacts.Delete(buyerContact);  //delete contact if the call is failed
+							//_unitOfWork.Contacts.Delete(buyerContact);  //delete contact if the call is failed
 							break;
 						}
 				}

@@ -101,7 +101,8 @@ public class PropertyController : ControllerBase
 
         return Ok(propertyResponses);
     }
-    [HttpPost("HandleCallOutcomeFromSeller")]
+
+	[HttpPost("HandleCallOutcomeFromSeller")]
     public async Task<IActionResult> HandleCallOutcomeFromSeller([FromBody] AICallResultFromSeller resultDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -131,7 +132,7 @@ public class PropertyController : ControllerBase
 			{
 				ContactId = sellerContact.ContactId,
 				ContactName = resultDto.ContactName,
-				SubjectTypeId = 1, //buy
+				SubjectTypeId = 2, //resales
 				Transcript = resultDto.Summary,
 				Timestamp = DateTime.UtcNow,
 				Duration = (int)Math.Floor(resultDto.Duration),
@@ -168,25 +169,25 @@ public class PropertyController : ControllerBase
                             PropertyStatusId = 1,
                             PaymentMethodId = sType?.Id ?? 1,
 
-                            Negotiable= resultDto.propertyDTO.PropertyInfo.Negotiable,
+                            Negotiable= resultDto.propertyDTO.PropertyInfo.Negotiable ?? false,
 
-							Price = resultDto.propertyDTO.PropertyInfo.Price,
-                            Area = resultDto.propertyDTO.PropertyInfo.Area,
-                            Rooms = resultDto.propertyDTO.PropertyInfo.Rooms,
-                            Bathrooms = resultDto.propertyDTO.PropertyInfo.Bathrooms,
-                            DownPayment = resultDto.propertyDTO.PropertyPayment.DownPayment,
-                            Description = resultDto.propertyDTO.PropertyInfo.AdditionalInfo,
+							Price = resultDto.propertyDTO?.PropertyInfo?.Price ?? 0,
+							Area = resultDto.propertyDTO?.PropertyInfo?.Area ?? 0,
+							Rooms = resultDto.propertyDTO?.PropertyInfo?.Rooms ?? 0,
+							Bathrooms = resultDto.propertyDTO?.PropertyInfo?.Bathrooms ?? 0,
+							DownPayment = resultDto.propertyDTO?.PropertyPayment?.DownPayment ?? 0,
+							Description = resultDto.propertyDTO?.PropertyInfo?.AdditionalInfo ?? string.Empty,
 
-                            PropertiesLocation = new PropertiesLocation
+							PropertiesLocation = new PropertiesLocation
                             {
                                 Country = resultDto.propertyDTO.PropertyLocation.Country ?? "مصر",
                                 Governorate = resultDto.propertyDTO.PropertyLocation.Governorate ?? "",
                                 City = resultDto.propertyDTO.PropertyLocation.City ?? "",
                                 District = resultDto.propertyDTO.PropertyLocation.District ?? "",
                                 Street = resultDto.propertyDTO.PropertyLocation.Street ?? "",
-                                BuildingNumber = resultDto.propertyDTO.PropertyLocation.BuildingNumber,
-                                FloorNumber = resultDto.propertyDTO.PropertyLocation.FloorNumber,
-                                ApartmentNumber = resultDto.propertyDTO.PropertyLocation.ApartmentNumber
+                                BuildingNumber = resultDto.propertyDTO.PropertyLocation.BuildingNumber ?? 0,
+                                FloorNumber = resultDto.propertyDTO.PropertyLocation.FloorNumber ?? 0,
+                                ApartmentNumber = resultDto.propertyDTO.PropertyLocation.ApartmentNumber ?? 0
                             }
                         };
 
@@ -218,11 +219,13 @@ public class PropertyController : ControllerBase
 
 						if (currentRetryCount >= 3) //retry count for 3 times only
 						{
-                            _unitOfWork.Contacts.Delete(sellerContact);  //delete Invalid Number or failed to reach
+							callLog.CallOutcomeId = 4; // Failed
+							//_unitOfWork.Contacts.Delete(sellerContact);  //delete Invalid Number or failed to reach
 						}
 						else
 						{
                             sellerContact.ContactStatusId = 5; //Retry pending
+							_unitOfWork.Save();
 							await _queue.QueueCallAsync(sellerContact.ContactId);
 						}
 						break;
@@ -232,7 +235,7 @@ public class PropertyController : ControllerBase
 						callLog.CallSessionStateId = 2;//Not Answered
 						callLog.CallOutcomeId = 4; // Failed
 
-						_unitOfWork.Contacts.Delete(sellerContact);  //delete contact if the call is failed
+						//_unitOfWork.Contacts.Delete(sellerContact);  //delete contact if the call is failed
 						break;
 					}
 			}
@@ -246,6 +249,7 @@ public class PropertyController : ControllerBase
 
 			if (nextSeller != null)
 			{
+				await Task.Delay(TimeSpan.FromSeconds(10));
 				await _queue.QueueCallAsync(nextSeller.ContactId);
 			}
 
@@ -254,7 +258,7 @@ public class PropertyController : ControllerBase
 				status = "success",
 				data = new
 				{
-					message = "Outcome processed and property added successfully"
+					message = "Outcome processed successfully"
 				}
 			});
 		}

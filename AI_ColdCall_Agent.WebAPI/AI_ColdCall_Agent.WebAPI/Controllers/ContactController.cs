@@ -56,7 +56,7 @@ public class ContactController : ControllerBase
 
 			var contact = new Contact();
 
-			var existingContact = _unitOfWork.Contacts.FindOneItem(c => c.Phone == contactDto.Phone && c.ContactTypeId == 1); // check if the contact already exists for buyer
+			var existingContact = _unitOfWork.Contacts.FindOneItem(c => c.Phone == contactDto.Phone); // check if the contact already exists for buyer
 
 			if (existingContact != null)
 			{
@@ -76,6 +76,7 @@ public class ContactController : ControllerBase
 				existingContact.Name= contactDto.Name; // update name
 				existingContact.Email= contactDto.Email; // update email
 				existingContact.ContactStatusId = 1; // if the contact is existing into system return the status to pending_call
+				existingContact.ContactTypeId = 1; //buyer
 			}
 			else
 			{
@@ -120,7 +121,6 @@ public class ContactController : ControllerBase
 		return BadRequest(ModelState);
 	}
 
-
 	[HttpPost("UploadCSVForSellers")]
 	public async Task<IActionResult> UploadCSVForSellers(IFormFile file)
 	{
@@ -155,7 +155,7 @@ public class ContactController : ControllerBase
 			var incomingPhones = allRecords.Where(p => p.Phone != null).Select(p => p.Phone).Distinct().ToList();
 
 			//Get All sellers from DB whose phone numbers are in the incomingPhones list
-			var existingSellers = await _unitOfWork.Contacts.FindAllAsync(s => s.ContactTypeId == 2 && incomingPhones.Contains(s.Phone));
+			var existingSellers = await _unitOfWork.Contacts.FindAllAsync(s =>incomingPhones.Contains(s.Phone));
 
 			var existingSellersDictionary = existingSellers.ToDictionary(s => s.Phone, s => s);
 
@@ -163,6 +163,8 @@ public class ContactController : ControllerBase
 			int successCount = 0;
 			List<string> errors = new List<string>();
 
+			// List to keep track of IDs we need to call
+			List<int> idsToQueue = new List<int>();
 
 			foreach (var csvRecord in allRecords)
 			{
@@ -189,9 +191,14 @@ public class ContactController : ControllerBase
 					//Check Duplicates in phone numbers
 					if (existingSellersDictionary.TryGetValue(csvRecord.Phone, out var existingSeller))
 					{
+						existingSeller.Name = csvRecord.Name;
+						existingSeller.Email = csvRecord.Email;
 						existingSeller.ContactStatusId = 1; // if the seller is existing into system return the status to pending_call
+						existingSeller.ContactTypeId = 2; //seller
 
 						_unitOfWork.Save();
+
+						idsToQueue.Add(existingSeller.ContactId); // Add existing to queue
 
 						errors.Add($"Row skipped (Duplicate): {csvRecord.Phone} exists.");
 						continue;
@@ -207,9 +214,12 @@ public class ContactController : ControllerBase
 					};
 
 					await _unitOfWork.Contacts.AddAsync(newSeller);
+					_unitOfWork.Save();
 
 					//add new seller to existingSellersDictionary to avoid duplicates in the same CSV upload
 					existingSellersDictionary.Add(newSeller.Phone, newSeller);
+
+					idsToQueue.Add(newSeller.ContactId);
 
 					successCount++;  //increment the count of actually new sellers
 				}
@@ -219,14 +229,10 @@ public class ContactController : ControllerBase
 				}
 			}
 
-			_unitOfWork.Save(); //save all new sellers int DB
-
-			//Trigger the first call only
-			var firstSeller=(await _unitOfWork.Contacts.FindAllAsync(c=>c.ContactTypeId==2 && c.ContactStatusId==1)).OrderBy(c=>c.ContactId).FirstOrDefault();
-
-			if(firstSeller != null)
+			// TRIGGER THE QUEUE FOR ALL
+			foreach (var id in idsToQueue)
 			{
-				await _queue.QueueCallAsync(firstSeller.ContactId);
+				await _queue.QueueCallAsync(id);
 			}
 
 			return Ok(new
