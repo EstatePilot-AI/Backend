@@ -58,4 +58,6 @@ public class Property
 
 	public virtual PropertiesLocation PropertiesLocation { get; set; }
 
+	public ICollection<PropertyImages>? propertyImages { get; set; }
+
 }

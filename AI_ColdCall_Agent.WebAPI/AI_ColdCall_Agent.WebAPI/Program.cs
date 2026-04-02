@@ -13,7 +13,11 @@ using Services;
 using System.Text;
 using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+	Args = args,
+	WebRootPath = "wwwroot"
+});
 
 // Add services to the container.
 
@@ -124,22 +128,24 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//	app.UseSwagger();
-//	app.UseSwaggerUI();
-//}
+app.UseStaticFiles(); //for wwwroot
 
-if (!app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
-	app.UseSwaggerUI(c =>
-	{
-		c.SwaggerEndpoint("/swagger/v1/swagger.json", "my api v1");
-		c.RoutePrefix = string.Empty; // set to empty string to serve at root
-	});
+	app.UseSwaggerUI();
 }
+
+//if (!app.Environment.IsDevelopment())
+//{
+//	app.UseSwagger();
+//	app.UseSwaggerUI(c =>
+//	{
+//		c.SwaggerEndpoint("/swagger/v1/swagger.json", "my api v1");
+//		c.RoutePrefix = string.Empty; // set to empty string to serve at root
+//	});
+//}
 
 app.UseHttpsRedirection();
 
