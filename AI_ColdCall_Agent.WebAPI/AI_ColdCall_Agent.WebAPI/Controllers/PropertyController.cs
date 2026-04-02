@@ -19,12 +19,14 @@ public class PropertyController : ControllerBase
     private readonly IUnitOfWork _unitOfWork;
 	private readonly IBackgroundTaskQueue _queue;
 	private readonly EmailSender _emailSender;
+	private readonly IWebHostEnvironment _env;
 
-	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender)
+	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender, IWebHostEnvironment env)
     {
         _unitOfWork = unitOfWork;
 		_queue = queue;
 		_emailSender = emailSender;
+		_env = env;
 	}
 
     [HttpGet("GetPropertyById/{id}")]
@@ -36,8 +38,9 @@ public class PropertyController : ControllerBase
             "PropertyType",
             "PropertyStatus",
             "FinishingType",
-            "PropertiesLocation"
-            }
+            "PropertiesLocation",
+			"propertyImages"
+			}
         );
 
         if (property == null)
@@ -64,8 +67,10 @@ public class PropertyController : ControllerBase
             Street = property.PropertiesLocation?.Street,
             BuildingNumber = property.PropertiesLocation?.BuildingNumber ?? 0,
             FloorNumber = property.PropertiesLocation?.FloorNumber ?? 0,
-            ApartmentNumber = property.PropertiesLocation?.ApartmentNumber ?? 0
-        };
+            ApartmentNumber = property.PropertiesLocation?.ApartmentNumber ?? 0,
+
+			ImageURLs = property.propertyImages?.Select(p => p.ImageURL).ToList()
+		};
 
         return Ok(response);
     }
@@ -76,7 +81,8 @@ public class PropertyController : ControllerBase
         var properties = await _unitOfWork.Properties.GetAllWithIncludesAsync(
             p => p.PropertyType,
             p => p.PropertyStatus,
-            p => p.PropertiesLocation
+            p => p.PropertiesLocation,
+            p => p.propertyImages
         );
 
         if (properties == null || !properties.Any())
@@ -84,7 +90,7 @@ public class PropertyController : ControllerBase
             return Ok(new List<PropertyResponse>());
         }
 
-        
+
         var propertyResponses = properties.Select(p => new PropertyResponse
         {
             PropertyId = p.PropertyId,
@@ -95,7 +101,9 @@ public class PropertyController : ControllerBase
             Status = p.PropertyStatus?.Name,
 
             City = p.PropertiesLocation?.Country,
-            District = p.PropertiesLocation?.City
+            District = p.PropertiesLocation?.City,
+
+            ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
 
         }).ToList();
 
@@ -273,30 +281,24 @@ public class PropertyController : ControllerBase
         }
     }
 
-    [HttpPut("UpdateProperty/{id}")]
-    public async Task<IActionResult> UpdateProperty(int id, [FromBody] PropertyListDto propertyDto)
+    [HttpPut("UpdateProperty/{id:int}")]
+    public async Task<IActionResult> UpdateProperty(int id, UpdatePropertyToAddImages propertyDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var existingProperty = _unitOfWork.Properties.FindOneItem(
             p => p.PropertyId == id,
-            new string[] { "PropertiesLocation", "PropertyType", "PropertyStatus", "FinishingType" }
+            new string[] { "PropertiesLocation", "PropertyType", "PropertyStatus", "FinishingType", "propertyImages" }
         );
 
         if (existingProperty == null) return NotFound($"Property {id} not found.");
 
-       
-        var typeEntity = _unitOfWork.PropertyTypes.FindOneItem(t => t.Name == propertyDto.PropertyType);
-        if (typeEntity != null) existingProperty.PropertyTypeId = typeEntity.Id;
 
-        var statusEntity = _unitOfWork.PropertyStatuses.FindOneItem(s => s.Name == propertyDto.PropertyStatus);
-        if (statusEntity != null) existingProperty.PropertyStatusId = statusEntity.Id;
+        existingProperty.PropertyTypeId = propertyDto.PropertyType;
+        existingProperty.FinishingTypeId = propertyDto.FinishingType;
+        existingProperty.Negotiable = propertyDto.Negotiable;
 
-        var finishEntity = _unitOfWork.FinishingTypes.FindOneItem(f => f.Name == propertyDto.FinishingType);
-        if (finishEntity != null) existingProperty.FinishingTypeId = finishEntity.Id;
-
-       
-        existingProperty.Price = propertyDto.Price;
+		existingProperty.Price = propertyDto.Price;
         existingProperty.Area = propertyDto.Area;
         existingProperty.Rooms = propertyDto.Rooms;
         existingProperty.Bathrooms = propertyDto.Bathrooms;
@@ -314,14 +316,51 @@ public class PropertyController : ControllerBase
             existingProperty.PropertiesLocation.ApartmentNumber = propertyDto.ApartmentNumber;
         }
 
-    
-        _unitOfWork.Properties.Update(existingProperty);
+
+        string folderName = Path.Combine(_env.WebRootPath, "Images");
+
+        if(existingProperty.propertyImages != null)
+        {
+            foreach(var oldImage in existingProperty.propertyImages)
+            {
+                System.IO.File.Delete(folderName + oldImage.ImageURL);
+            }
+            existingProperty.propertyImages.Clear();
+        }
+
+        foreach(var file in propertyDto.ImageURLs)
+        {
+            var imageName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var fullPath = Path.Combine(folderName, imageName);
+
+			using (var stream = System.IO.File.Create(fullPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var propertyImage = new PropertyImages
+            {
+                PropertyId = existingProperty.PropertyId,
+                ImageURL = imageName
+            };
+
+            await _unitOfWork.PropertyImages.AddAsync(propertyImage);
+		}
+
+		_unitOfWork.Properties.Update(existingProperty);
         _unitOfWork.Save();
 
-        return NoContent(); 
+        return Ok(new
+        {
+            status = "success",
+            data = new
+            {
+                message = $"Property {id} updated successfully."
+			}
+		}); 
     }
 
-    [HttpGet("GlobalSearch")]
+	[HttpGet("GlobalSearch")]
     public async Task<IActionResult> GlobalSearch([FromQuery] string term)
     {
         if (string.IsNullOrWhiteSpace(term))

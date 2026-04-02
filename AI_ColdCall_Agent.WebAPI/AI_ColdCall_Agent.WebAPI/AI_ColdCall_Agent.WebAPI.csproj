@@ -23,4 +23,8 @@
     <ProjectReference Include="..\..\AI_ColdCall_Agent.Infrastructure\AI_ColdCall_Agent.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\" />
+  </ItemGroup>
+
 </Project>

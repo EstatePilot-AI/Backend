@@ -39,6 +39,7 @@ public class UnitOfWork :IUnitOfWork
 		PropertyTypes = new Repository<PropertyType>(context);
 		SubjectTypeCalls = new Repository<SubjectTypeCall>(context);
 		UserHistories = new Repository<UserHistory>(context);
+		PropertyImages=new Repository<PropertyImages>(context);
 	}
 
 	public IRepository<BuyerReference> BuyerReferences { get; }
@@ -65,6 +66,7 @@ public class UnitOfWork :IUnitOfWork
 	public IRepository<PropertyType> PropertyTypes { get; }
 	public IRepository<SubjectTypeCall> SubjectTypeCalls { get; }
 	public IRepository<UserHistory> UserHistories { get; }
+	public IRepository<PropertyImages> PropertyImages { get; }
 
 	public void Dispose()
 	{
