@@ -54,7 +54,7 @@ public class AccountController : ControllerBase
 					PhoneNumber = createUserDto.PhoneNumber
 				};
 
-				var result = await _userManager.CreateAsync(newUser);
+				var result = await _userManager.CreateAsync(newUser, createUserDto.Password);
 
 				if (result.Succeeded)
 				{
@@ -70,64 +70,9 @@ public class AccountController : ControllerBase
 					await _userManager.AddToRoleAsync(newUser, createUserDto.Role.ToLower());
 
 					var subject = "Account Created";
-					var htmlMessage = $@"
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Welcome to Our Company</title>
-    <style>
-        /* Resets to ensure consistent rendering */
-        body {{ margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; }}
-        table {{ border-spacing: 0; }}
-        td {{ padding: 0; }}
-        img {{ border: 0; }}
-        
-        /* Mobile styles */
-        @media screen and (max-width: 600px) {{
-            .container {{ width: 100% !important; }}
-            .content {{ padding: 20px !important; }}
-        }}
-    </style>
-</head>
-<body style=""margin: 0; padding: 0; background-color: #f4f4f4;"">
+					var htmlMessage= HTMLMessages.ConfirmationEmailAboutCreatedAccount(newUser.Name, newUser.Email, createUserDto.Password);
 
-    <table role=""presentation"" width=""100%"" border=""0"" cellspacing=""0"" cellpadding=""0"" style=""background-color: #f4f4f4;"">
-        <tr>
-            <td align=""center"" style=""padding: 40px 0;"">
-                
-                <table role=""presentation"" class=""container"" width=""600"" border=""0"" cellspacing=""0"" cellpadding=""0"" style=""background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden;"">
-                    <tr>
-                        <td class=""content"" style=""padding: 40px 30px; text-align: left; color: #333333;"">
-                            <p style=""font-size: 16px; line-height: 1.6; margin-bottom: 20px;"">
-                                Hi <strong>{newUser.Name}</strong>,
-                            </p>
-                            <p style=""font-size: 16px; line-height: 1.6; margin-bottom: 20px;"">
-                                An administrator has just created an account for you on our platform. We are thrilled to have you on board!
-                            </p>
-                            
-                            <table role=""presentation"" width=""100%"" border=""0"" cellspacing=""0"" cellpadding=""0"" style=""background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; margin-bottom: 25px;"">
-                                <tr>
-                                    <td style=""padding: 15px;"">
-                                        <p style=""margin: 0 0 10px 0; font-size: 14px; color: #555;""><strong>Login Email:</strong> {newUser.Email}</p>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style=""font-size: 16px; line-height: 1.6; margin-bottom: 30px;"">
-                                Please change your password immediately to secure your account by using reset password and log in.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                </td>
-        </tr>
-    </table>
-
-</body>
-</html>";
-				     _emailSender.SendEmail(subject, newUser.Email, htmlMessage);
+					 _emailSender.SendEmail(subject, newUser.Email, htmlMessage);
 
 					return Ok("User account is created successfully.");
 				}

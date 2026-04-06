@@ -131,8 +131,8 @@ public class PropertyController : ControllerBase
 				});
 			}
 
-			//To get the retryCount for the current call by counting the previous call logs for the same buyer
-			var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == sellerContact.ContactId)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
+            //To get the retryCount for the current call by counting the previous call logs for the same buyer
+            var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == sellerContact.ContactId && cl.Contact.ContactTypeId == 2)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
 
 			int currentRetryCount = callLogForSameBuyer?.RetryCount ?? 0;
 
@@ -253,13 +253,13 @@ public class PropertyController : ControllerBase
             //find the next available seller and enqueue it for calling
             //enable the worker to call when The AI is ready to the next call
 
-            var nextSeller = await _unitOfWork.Contacts.GetFirstOrDefaultWithStringsAsync(c => c.ContactStatusId == 1 || c.ContactStatusId == 5);
+            var nextSeller = (await _unitOfWork.Contacts.FindAllAsync(c => c.ContactStatusId == 1 || c.ContactStatusId == 5)).FirstOrDefault();
 
-			if (nextSeller != null)
-			{
-				await Task.Delay(TimeSpan.FromSeconds(10));
-				await _queue.QueueCallAsync(nextSeller.ContactId);
-			}
+            if (nextSeller != null)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(7));
+                await _queue.QueueCallAsync(nextSeller.ContactId);
+            }
 
 			return Ok(new
 			{

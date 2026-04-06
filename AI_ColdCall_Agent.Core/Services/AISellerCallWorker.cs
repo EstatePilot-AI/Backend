@@ -65,7 +65,7 @@ public class AISellerCallWorker : BackgroundService
 			var callLogs = await unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == seller.ContactId);
 			var lastCall = callLogs.OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
 
-			if (lastCall != null && (DateTime.UtcNow - lastCall.Timestamp).TotalSeconds >= 10)
+			if (lastCall != null && (DateTime.UtcNow - lastCall.Timestamp).TotalHours >= 2)
 			{
 				shouldCall = true;
 			}

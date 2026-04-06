@@ -71,7 +71,7 @@ public class AIOutboundCallWorker : BackgroundService
 		LeadRequest? request = null;
 		for(int i = 0; i < 10; i++)
 		{
-			request = unitOfWork.LeadRequests.FindOneItem(lr => lr.RequestId == leadRequestId, new string[] { "Contact", "Property", "Property.PropertyType", "Property.FinishingType", "Property.PropertiesLocation", "LeadRequestStatus" });
+			request = (await unitOfWork.LeadRequests.FindAllAsync(lr => lr.RequestId == leadRequestId, new string[] { "Contact", "Property", "Property.PropertyType", "Property.FinishingType", "Property.PropertiesLocation", "LeadRequestStatus" })).FirstOrDefault();
 
 			if (request != null) break;
 
