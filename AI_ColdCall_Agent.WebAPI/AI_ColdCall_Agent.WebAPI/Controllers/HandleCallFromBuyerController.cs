@@ -48,7 +48,7 @@ public class HandleCallFromBuyerController : ControllerBase
 			}
 
 			//To get the retryCount for the current call by counting the previous call logs for the same buyer
-			var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == leadRequest.BuyerContactId)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
+			var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == leadRequest.BuyerContactId && cl.Contact.ContactTypeId==1)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
 
 			int currentRetryCount = callLogForSameBuyer?.RetryCount ?? 0;
 
@@ -124,15 +124,6 @@ public class HandleCallFromBuyerController : ControllerBase
 				await _unitOfWork.CallLogs.AddAsync(callLog);
 				_unitOfWork.Save();
 
-				//find the next available lead and enqueue it for calling
-				//enable the worker to call when The AI is ready to the next call
-				var nextLead = (await _unitOfWork.LeadRequests.FindAllAsync(lr => lr.LeadRequestStatusId == 1 || lr.LeadRequestStatusId == 6)).FirstOrDefault();
-
-				if (nextLead != null)
-				{
-					await _queue.QueueCallAsync(nextLead.RequestId);
-				}
-
 				return Ok(new {
 					status= "success",
 					data= new
@@ -144,6 +135,17 @@ public class HandleCallFromBuyerController : ControllerBase
 			catch(Exception ex)
 			{
 				return BadRequest(ex.Message);
+			}
+			finally
+			{
+				//find the next available lead and enqueue it for calling
+				//enable the worker to call when The AI is ready to the next call
+				var nextLead = (await _unitOfWork.LeadRequests.FindAllAsync(lr => lr.LeadRequestStatusId == 1 || lr.LeadRequestStatusId == 6)).FirstOrDefault();
+
+				if (nextLead != null)
+				{
+					await _queue.QueueCallAsync(nextLead.RequestId);
+				}
 			}
 		}
 

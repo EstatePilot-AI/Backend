@@ -35,7 +35,7 @@ public class CallLogController : ControllerBase
 			});
 		}
 
-		var callLogsDto = callLogs.Select(cl => new
+		var callLogsDto = callLogs.OrderByDescending(cl=>cl.Timestamp).Select(cl => new
 		{
 			CallId = cl.CallId,
 			BuyerName = cl.ContactName,
