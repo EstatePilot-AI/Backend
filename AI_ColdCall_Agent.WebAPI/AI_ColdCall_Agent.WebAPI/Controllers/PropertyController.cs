@@ -110,6 +110,52 @@ public class PropertyController : ControllerBase
         return Ok(propertyResponses);
     }
 
+
+	[HttpGet("GetAllPropertiesWithDetails")]
+	public async Task<IActionResult> GetAllPropertiesWithDetails()
+	{
+		var properties = await _unitOfWork.Properties.GetAllWithIncludesAsync(
+			p => p.PropertyType,
+			p => p.PropertyStatus,
+            p => p.FinishingType,
+			p => p.PropertiesLocation,
+			p => p.propertyImages
+		);
+
+		if (properties == null || !properties.Any())
+		{
+			return Ok(new List<PropertyResponse>());
+		}
+
+
+		var propertyResponses = properties.Select(p => new
+		{
+			PropertyId = p.PropertyId,
+			PropertyType = p.PropertyType.Name,
+			PropertyStatus = p.PropertyStatus.Name,
+			FinishingType = p.FinishingType.Name,
+
+			Price = p.Price,
+			Area = p.Area,
+			Rooms = p.Rooms,
+			Bathrooms = p.Bathrooms,
+
+			Country = p.PropertiesLocation?.Country,
+			Governorate = p.PropertiesLocation?.Governorate,
+			City = p.PropertiesLocation?.City,
+			District = p.PropertiesLocation?.District,
+			Street = p.PropertiesLocation?.Street,
+			BuildingNumber = p.PropertiesLocation?.BuildingNumber ?? 0,
+			FloorNumber = p.PropertiesLocation?.FloorNumber ?? 0,
+			ApartmentNumber = p.PropertiesLocation?.ApartmentNumber ?? 0,
+
+			ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
+
+		}).ToList();
+
+		return Ok(propertyResponses);
+	}
+
 	[HttpPost("HandleCallOutcomeFromSeller")]
     public async Task<IActionResult> HandleCallOutcomeFromSeller([FromBody] AICallResultFromSeller resultDto)
     {
