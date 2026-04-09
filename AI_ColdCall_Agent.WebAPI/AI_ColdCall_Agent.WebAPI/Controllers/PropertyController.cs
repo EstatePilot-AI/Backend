@@ -178,9 +178,9 @@ public class PropertyController : ControllerBase
 			}
 
             //To get the retryCount for the current call by counting the previous call logs for the same buyer
-            var callLogForSameBuyer = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == sellerContact.ContactId && cl.Contact.ContactTypeId == 2)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
+            var callLogForSameSeller = (await _unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == sellerContact.ContactId && cl.Contact.ContactTypeId == 2)).OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
 
-			int currentRetryCount = callLogForSameBuyer?.RetryCount ?? 0;
+			int currentRetryCount = callLogForSameSeller?.RetryCount ?? 0;
 
 			var callLog = new CallLog
 			{
@@ -274,7 +274,6 @@ public class PropertyController : ControllerBase
 						if (currentRetryCount >= 3) //retry count for 3 times only
 						{
 							callLog.CallOutcomeId = 4; // Failed
-							//_unitOfWork.Contacts.Delete(sellerContact);  //delete Invalid Number or failed to reach
 						}
 						else
 						{
@@ -289,23 +288,11 @@ public class PropertyController : ControllerBase
 						callLog.CallSessionStateId = 2;//Not Answered
 						callLog.CallOutcomeId = 4; // Failed
 
-						//_unitOfWork.Contacts.Delete(sellerContact);  //delete contact if the call is failed
 						break;
 					}
 			}
             await _unitOfWork.CallLogs.AddAsync(callLog);
 			_unitOfWork.Save();
-
-            //find the next available seller and enqueue it for calling
-            //enable the worker to call when The AI is ready to the next call
-
-            var nextSeller = (await _unitOfWork.Contacts.FindAllAsync(c => c.ContactStatusId == 1 || c.ContactStatusId == 5)).FirstOrDefault();
-
-            if (nextSeller != null)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(7));
-                await _queue.QueueCallAsync(nextSeller.ContactId);
-            }
 
 			return Ok(new
 			{

@@ -27,76 +27,63 @@ public class AISellerCallWorker : BackgroundService
 	}
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
+		_logger.LogInformation("Seller Worker started in Polling Mode.");
+
 		while (!stoppingToken.IsCancellationRequested)
-		{
-			// Wait for the signal from CSV upload or previous call outcome
-			var sellerId = await _queue.DequeueAsync(stoppingToken);
-
-			await ExecuteSellerCallLogic(sellerId, stoppingToken);
-
-		}
-	}
-
-	private async Task ExecuteSellerCallLogic(int sellerId, CancellationToken ct)
-	{
-		using var scope = _scopeFactory.CreateScope();
-		var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-		//Retry lookup. The DB might be slow to commit the CSV rows.
-		Contact? seller = null;
-		for(int i = 0; i < 10; i++)
-		{
-			//Get seller contact
-			seller = unitOfWork.Contacts.FindOneItem(c => c.ContactId == sellerId && c.ContactTypeId == 2); //2 refers to seller contact type
-			if (seller != null) break;
-			await Task.Delay(1000, ct); // Wait 1s and try again
-		}
-		
-		if (seller == null) return;
-
-		bool shouldCall = false;
-
-		if (seller.ContactStatusId==1) //pending
-		{
-			shouldCall = true;
-		}
-		else if(seller.ContactStatusId==5) //retry pending
-		{
-			var callLogs = await unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == seller.ContactId);
-			var lastCall = callLogs.OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
-
-			if (lastCall != null && (DateTime.UtcNow - lastCall.Timestamp).TotalHours >= 2)
-			{
-				shouldCall = true;
-			}
-		}
-
-		if (shouldCall)
 		{
 			try
 			{
-				_logger.LogInformation("Initiating AI call for Seller {Id}...", sellerId);
+				using var scope = _scopeFactory.CreateScope();
+				var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-				seller.ContactStatusId = 7; //initiated - call in progress
-				unitOfWork.Save();
+				// 1. Find all potential candidates (Status 1 or 5)
+				var candidates = await unitOfWork.Contacts.FindAllAsync(c =>
+					c.ContactTypeId == 2 && (c.ContactStatusId == 1 || c.ContactStatusId == 5));
 
-				await TriggerExternalCall(seller);
+				Contact? nextSeller = null;
 
-				_logger.LogInformation("Successfully triggered API for Seller {Id}.", sellerId);
+				foreach (var seller in candidates.OrderBy(c => c.ContactId))
+				{
+					if (seller.ContactStatusId == 1) // Fresh lead
+					{
+						nextSeller = seller;
+						break;
+					}
 
-				// only if a call was actually made.
-				await Task.Delay(TimeSpan.FromSeconds(2), ct);
+					if (seller.ContactStatusId == 5) // Retry lead
+					{
+						// Check the last call log for this specific seller
+						var logs = await unitOfWork.CallLogs.FindAllAsync(cl => cl.ContactId == seller.ContactId);
+						var lastCall = logs.OrderByDescending(cl => cl.Timestamp).FirstOrDefault();
+
+						// ONLY proceed if 2 hours have passed since the LAST call
+						if (lastCall == null || (DateTime.UtcNow - lastCall.Timestamp).TotalHours >= 2)
+						{
+							nextSeller = seller;
+							break;
+						}
+					}
+				}
+
+				if (nextSeller != null)
+				{
+					_logger.LogInformation("Processing Seller {Id}. Status: {Status}", nextSeller.ContactId, nextSeller.ContactStatusId);
+
+					// 2. LOCK immediately to Status 7 (Initiated)
+					nextSeller.ContactStatusId = 7;
+					unitOfWork.Save();
+
+					await TriggerExternalCall(nextSeller);
+				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Failed to trigger external call for Seller {Id}. Reverting status.", sellerId);
-
-				seller.ContactStatusId = 5;
-				unitOfWork.Save();
+				_logger.LogError(ex, "Worker Loop Error");
 			}
-			
-		}
 
+			// Wait 15-20 seconds before checking the DB again
+			await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
+		}
 	}
 
 	private async Task TriggerExternalCall(Contact seller)
