@@ -171,14 +171,6 @@ public class ContactController : ControllerBase
 
 				try
 				{
-					//var seller = _unitOfWork.Contacts.FindOneItem(s => s.Phone == csvRecord.Phone);
-
-					//if (seller != null) //check if the seller is existing in the system
-					//{
-					//	seller.ContactStatusId = 1; // if the seller is existing into system return the status to pending_call
-					//	continue;
-					//}
-
 					// Validate Format for name and phonenumber
 					var context = new ValidationContext(csvRecord);
 					var validationResults = new List<ValidationResult>();
@@ -196,8 +188,6 @@ public class ContactController : ControllerBase
 						existingSeller.ContactStatusId = 1; // if the seller is existing into system return the status to pending_call
 						existingSeller.ContactTypeId = 2; //seller
 
-						_unitOfWork.Save();
-
 						idsToQueue.Add(existingSeller.ContactId); // Add existing to queue
 
 						errors.Add($"Row skipped (Duplicate): {csvRecord.Phone} exists.");
@@ -214,7 +204,6 @@ public class ContactController : ControllerBase
 					};
 
 					await _unitOfWork.Contacts.AddAsync(newSeller);
-					_unitOfWork.Save();
 
 					//add new seller to existingSellersDictionary to avoid duplicates in the same CSV upload
 					existingSellersDictionary.Add(newSeller.Phone, newSeller);
@@ -228,12 +217,7 @@ public class ContactController : ControllerBase
 					errors.Add($"Failed to save {csvRecord.Email}: {ex.Message}");
 				}
 			}
-
-			// TRIGGER THE QUEUE FOR ALL
-			foreach (var id in idsToQueue)
-			{
-				await _queue.QueueCallAsync(id);
-			}
+			_unitOfWork.Save();
 
 			return Ok(new
 			{
