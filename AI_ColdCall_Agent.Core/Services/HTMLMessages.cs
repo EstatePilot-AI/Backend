@@ -150,7 +150,7 @@ public class HTMLMessages
         </div>
         
         <div class=""action-area"">
-            <a href="""" class=""btn btn-primary"">Update Property Details</a>
+            <a href=""https://estate-pilot-shop.vercel.app/properties/update/{id}"" class=""btn btn-primary"">Update Property Details</a>
         </div>
     </div>
 

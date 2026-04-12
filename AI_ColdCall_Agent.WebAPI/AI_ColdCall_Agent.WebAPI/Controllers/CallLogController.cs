@@ -1,4 +1,5 @@
-﻿using DTO;
+﻿using AI_ColdCall_Agent.Core.DTO;
+using DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -47,6 +48,21 @@ public class CallLogController : ControllerBase
 		});
 
 		return Ok(callLogsDto);
+	}
+
+	[HttpGet("GetCallOutcome")]
+	public async Task<IActionResult> GetCallOutcome()
+	{
+
+		var statuses = await _unitOfWork.CallOutcomes.GetAllAsync();
+
+		var response = statuses.Select(s => new
+		{
+			Id = s.Id,
+			Name = s.Name
+		}).ToList();
+
+		return Ok(response);
 	}
 
 	[HttpGet("GetCallLogById/{id:int}")]
