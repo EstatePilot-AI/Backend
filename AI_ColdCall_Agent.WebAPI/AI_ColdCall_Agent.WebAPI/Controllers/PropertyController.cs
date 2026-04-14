@@ -5,6 +5,7 @@ using IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Models;
 using RestSharp.Extensions;
 using Services;
@@ -20,13 +21,17 @@ public class PropertyController : ControllerBase
 	private readonly IBackgroundTaskQueue _queue;
 	private readonly EmailSender _emailSender;
 	private readonly IWebHostEnvironment _env;
+	private readonly IHubContext<DashboardHub> _hubContext;
+	private readonly DashboardAnalyticsService _analyticsService;
 
-	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender, IWebHostEnvironment env)
+	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender, IWebHostEnvironment env, IHubContext<DashboardHub> hubContext, DashboardAnalyticsService analyticsService)
     {
         _unitOfWork = unitOfWork;
 		_queue = queue;
 		_emailSender = emailSender;
 		_env = env;
+		_hubContext = hubContext;
+		_analyticsService = analyticsService;
 	}
 
     [HttpGet("GetPropertyById/{id}")]
@@ -293,6 +298,13 @@ public class PropertyController : ControllerBase
 			}
             await _unitOfWork.CallLogs.AddAsync(callLog);
 			_unitOfWork.Save();
+
+			// Build fresh analytics and push to all dashboard clients
+			var analytics = await _analyticsService.BuildAnalyticsAsync(
+				day: null, month: null, year: null);
+
+            if (analytics != null)
+                await _hubContext.Clients.Group("dashboard").SendAsync("ReceiveDashboardUpdate", analytics);
 
 			return Ok(new
 			{

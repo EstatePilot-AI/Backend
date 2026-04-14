@@ -59,9 +59,10 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAll", policy =>
 	{
-		policy.AllowAnyOrigin()
+		policy.SetIsOriginAllowed(origin => true)
 			  .AllowAnyMethod()
-			  .AllowAnyHeader();
+			  .AllowAnyHeader()
+			  .AllowCredentials(); //for SignalR
 	});
 });
 
@@ -79,7 +80,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<EmailSender>();   // inject EmailSender service
 builder.Services.AddTransient<IJWTService, JWTService>();  //inject JWTService
 
+builder.Services.AddScoped<DashboardAnalyticsService>(); 
 builder.Services.AddHttpClient();
+
+builder.Services.AddSignalR(options => {
+	options.EnableDetailedErrors = true; // This will tell you EXACTLY why it failed in the console
+});
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -114,6 +120,24 @@ builder.Services.AddAuthentication(options =>
 		ValidateLifetime = true,
 		ValidateIssuerSigningKey = true,
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"]))
+	};
+
+	options.Events = new JwtBearerEvents
+	{
+		OnMessageReceived = context =>
+		{
+			var accessToken = context.Request.Query["access_token"];
+
+			// If the request is for our hub...
+			var path = context.HttpContext.Request.Path;
+			if (!string.IsNullOrEmpty(accessToken) &&
+				path.StartsWithSegments("/dashboardHub"))
+			{
+				// Read the token out of the query string
+				context.Token = accessToken;
+			}
+			return Task.CompletedTask;
+		}
 	};
 });
 
@@ -157,6 +181,8 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map the hub so the frontend can connect
+app.MapHub<DashboardHub>("/dashboardHub");
 app.MapControllers();
 
 app.Run();
