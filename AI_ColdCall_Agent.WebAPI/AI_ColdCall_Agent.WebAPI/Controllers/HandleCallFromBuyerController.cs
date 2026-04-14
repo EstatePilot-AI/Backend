@@ -5,6 +5,7 @@ using IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Models;
 using Repositories;
 using Services;
@@ -19,13 +20,17 @@ public class HandleCallFromBuyerController : ControllerBase
 	private readonly IBackgroundTaskQueue _queue;
 	private readonly UserManager<ApplicationUser> _userManager;
 	private readonly EmailSender _emailSender;
+	private readonly IHubContext<DashboardHub> _hubContext;
+	private readonly DashboardAnalyticsService _analyticsService;
 
-	public HandleCallFromBuyerController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, UserManager<ApplicationUser> userManager, EmailSender emailSender)
+	public HandleCallFromBuyerController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, UserManager<ApplicationUser> userManager, EmailSender emailSender, IHubContext<DashboardHub> hubContext, DashboardAnalyticsService analyticsService)
 	{
 		_unitOfWork = unitOfWork;
 		_queue = queue;
 		_userManager = userManager;
 		_emailSender = emailSender;
+		_hubContext = hubContext;
+		_analyticsService = analyticsService;
 	}
 
 	[HttpPost("HandleCallOutcome")]
@@ -101,12 +106,12 @@ public class HandleCallFromBuyerController : ControllerBase
 							if (currentRetryCount >= 3) //retry count for 3 times only
 							{
 								leadRequest.LeadRequestStatusId = 7; //Invalid Number or failed to reach
-																	 //_unitOfWork.Contacts.Delete(buyerContact);  //delete contact if the call is failed
 								callLog.CallOutcomeId = 4; // Failed
 							}
 							else
 							{
 								leadRequest.LeadRequestStatusId = 6; //Retry pending
+								buyerContact.ContactStatusId = 5; //retry pending
 								await _queue.QueueCallAsync(leadRequest.RequestId);
 							}
 							break;
@@ -123,6 +128,13 @@ public class HandleCallFromBuyerController : ControllerBase
 				}
 				await _unitOfWork.CallLogs.AddAsync(callLog);
 				_unitOfWork.Save();
+
+				// Build fresh analytics and push to all dashboard clients
+				var analytics = await _analyticsService.BuildAnalyticsAsync(
+					day: null, month: null, year: null);
+
+				if (analytics != null)
+					await _hubContext.Clients.Group("dashboard").SendAsync("ReceiveDashboardUpdate", analytics);
 
 				return Ok(new {
 					status= "success",
