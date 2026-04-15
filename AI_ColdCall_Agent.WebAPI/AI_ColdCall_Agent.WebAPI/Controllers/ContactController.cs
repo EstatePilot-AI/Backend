@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using DTO;
 using Interfaces;
 using IServices;
@@ -36,7 +36,7 @@ public class ContactController : ControllerBase
 					status = "error",
 					error = new
 					{
-						message = "Invalid buyer Id"
+						message = "The buyer ID provided is not valid. Please check and try again."
 					}
 				});
 			}
@@ -49,7 +49,7 @@ public class ContactController : ControllerBase
 					status = "error",
 					error = new
 					{
-						message = "Property not found"
+						message = "We couldn't find the property you're interested in. It may no longer be available."
 					}
 				});
 			}
@@ -128,7 +128,7 @@ public class ContactController : ControllerBase
 		{
 			if (file == null || file.Length == 0)
 			{
-				return BadRequest("No file uploaded.");
+				return BadRequest("Please select a CSV file to upload.");
 			}
 
 			//Read All data from CSV file
@@ -147,7 +147,7 @@ public class ContactController : ControllerBase
 			}
 			catch (Exception ex)
 			{
-				return BadRequest(ex.Message);
+				return BadRequest("The uploaded file appears to be invalid or corrupted. Please make sure it's a properly formatted CSV file.");
 			}
 
 
@@ -237,14 +237,14 @@ public class ContactController : ControllerBase
 		{
 			if (id <= 0)
 			{
-				return BadRequest("Invalid contact ID.");
+				return BadRequest("The contact ID provided is not valid. Please check and try again.");
 			}
 
 			var contact = _unitOfWork.Contacts.FindOneItem(c => c.ContactId == id, new string[] { "ContactStatus", "ContactStatus" });
 
 			if (contact == null)
 			{
-				return NotFound("The contact isn't found in the system");
+				return NotFound("We couldn't find this contact in the system. It may have been removed.");
 			}
 
 			

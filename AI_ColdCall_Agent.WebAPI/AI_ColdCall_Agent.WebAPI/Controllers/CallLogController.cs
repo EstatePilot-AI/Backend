@@ -1,4 +1,4 @@
-﻿using AI_ColdCall_Agent.Core.DTO;
+using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +32,7 @@ public class CallLogController : ControllerBase
 		{
 			return NotFound(new
 			{
-				error = "There is no call Logs in the system"
+				error = "No call logs have been recorded yet."
 			});
 		}
 
@@ -72,7 +72,7 @@ public class CallLogController : ControllerBase
 		{
 			return BadRequest(new
 			{
-				error = "Id must be more than 0"
+				error = "Please provide a valid call log ID (must be a positive number)."
 			});
 		}
 
@@ -82,7 +82,7 @@ public class CallLogController : ControllerBase
 		{
 			return NotFound(new
 			{
-				error = $"Call Log with Id: {id} not found"
+				error = $"We couldn't find a call log with ID {id}. It may have been deleted."
 			});
 		}
 
@@ -148,7 +148,7 @@ public class CallLogController : ControllerBase
 				status = "error",
 				error = new
 				{
-					message = "No call logs found to delete."
+					message = "There are no call logs to delete at the moment."
 				}
 			});
 		}

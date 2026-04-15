@@ -1,4 +1,4 @@
-﻿using AI_ColdCall_Agent.Core.DTO;
+using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Interfaces;
 using IServices;
@@ -50,7 +50,7 @@ public class PropertyController : ControllerBase
 
         if (property == null)
         {
-            return NotFound($"Property with ID {id} not found.");
+            return NotFound($"We couldn't find a property with ID {id}. It may have been removed or doesn't exist.");
         }
 
         var response = new PropertyListDto
@@ -177,7 +177,7 @@ public class PropertyController : ControllerBase
 					status = "error",
 					error = new
 					{
-						message = $"Seller with ID {resultDto.LeadID} not found."
+						message = "We couldn't find the seller linked to this call. Please verify the seller information and try again."
 					}
 				});
 			}
@@ -320,8 +320,7 @@ public class PropertyController : ControllerBase
 
             return BadRequest(new
             {
-                error = "فشل في حفظ بيانات الـ AI",
-                details = ex.InnerException?.Message ?? ex.Message
+                error = "Something went wrong while processing the call data. Please try again later."
             });
         }
     }
@@ -336,7 +335,7 @@ public class PropertyController : ControllerBase
             new string[] { "PropertiesLocation", "PropertyType", "PropertyStatus", "FinishingType", "propertyImages" }
         );
 
-        if (existingProperty == null) return NotFound($"Property {id} not found.");
+        if (existingProperty == null) return NotFound($"We couldn't find property #{id}. It may have been removed or doesn't exist.");
 
 
         existingProperty.PropertyTypeId = propertyDto.PropertyType;
@@ -410,7 +409,7 @@ public class PropertyController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(term))
         {
-            return BadRequest("Search term cannot be empty.");
+            return BadRequest("Please enter a keyword to search for properties (e.g., city name, property type).");
         }
 
     

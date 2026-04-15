@@ -1,4 +1,4 @@
-﻿using DTO;
+using DTO;
 using Identity;
 using Interfaces;
 using IServices;
@@ -85,7 +85,7 @@ public class AccountController : ControllerBase
 					return BadRequest(ModelState);
 				}
 			}
-			return BadRequest("This email is already registered.");
+			return BadRequest("An account with this email already exists. Please use a different email or try logging in.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -110,7 +110,7 @@ public class AccountController : ControllerBase
 					return Ok(token);
 				}
 			}
-			return BadRequest("Invalid Email or Password");
+			return BadRequest("The email or password you entered is incorrect. Please try again.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -176,7 +176,7 @@ public class AccountController : ControllerBase
 
 				return Ok(new { message = "Password reset code sent." });
 			}
-			return NotFound("User with this email is not found.");
+			return NotFound("No account found with this email address. Please double-check and try again.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -197,7 +197,7 @@ public class AccountController : ControllerBase
 				}
 				return BadRequest(result.Errors);
 			}
-			return NotFound("User with this email is not found.");
+			return NotFound("No account found with this email address. Please double-check and try again.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -230,7 +230,7 @@ public class AccountController : ControllerBase
 				}
 				return BadRequest(ModelState);
 			}
-			return NotFound("User not found.");
+			return NotFound("Your session may have expired. Please log in again and retry.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -257,7 +257,7 @@ public class AccountController : ControllerBase
 				}
 				return BadRequest(ModelState);
 			}
-			return NotFound("User not found.");
+			return NotFound("Your session may have expired. Please log in again and retry.");
 		}
 		return BadRequest(ModelState);
 	}
@@ -298,7 +298,7 @@ public class AccountController : ControllerBase
 
 		if (user == null)
 		{
-			return NotFound("User not found.");
+			return NotFound("No user found with the provided ID. The account may have been deleted.");
 		}
 
 		var userDto = new UserDto
@@ -320,7 +320,7 @@ public class AccountController : ControllerBase
 		var user = await _userManager.GetUserAsync(User);
 		if (user == null)
 		{
-			return NotFound("User not found.");
+			return NotFound("Your session may have expired. Please log in again and retry.");
 		}
 
 		var userDto = new UserDto
