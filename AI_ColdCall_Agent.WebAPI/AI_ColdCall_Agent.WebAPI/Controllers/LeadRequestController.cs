@@ -1,4 +1,4 @@
-﻿using AI_ColdCall_Agent.Core.DTO;
+using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -53,7 +53,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             
             if (statusId == null || statusId <= 0)
             {
-                return BadRequest("يجب إدخال معرف الحالة (ID) بشكل صحيح للفلترة.");
+                return BadRequest("Please provide a valid status ID to filter leads.");
             }
 
             var leads = await _unitOfWork.LeadRequests.GetAllWithIncludesAsync(
@@ -115,7 +115,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                     status = "error",
                     error = new
                     {
-                        message = "No leads found to delete."
+                        message = "There are no leads to delete at the moment."
                     }
                 });
 			}
@@ -156,7 +156,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             if (lead == null)
             {
                 
-                return NotFound(new { message = $"Lead request with ID {id} was not found." });
+                return NotFound(new { message = $"We couldn't find a lead request with ID {id}. It may have been removed or doesn't exist." });
             }
 
             var response = new LeadRequestDto
