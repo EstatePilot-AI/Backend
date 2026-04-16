@@ -54,6 +54,9 @@ public class Property
 
 	public bool Negotiable { get; set; }
 
+	[Required]
+	public DateTime CreatedAt {  get; set; }
+
 	// 1-to-1 with Location
 
 	public virtual PropertiesLocation PropertiesLocation { get; set; }

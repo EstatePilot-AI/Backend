@@ -19,6 +19,6 @@ public class PropertyListDto
     public int BuildingNumber { get; set; }
     public int FloorNumber { get; set; }
     public int ApartmentNumber { get; set; }
-
+    public string CreatedAt { get; set; }
     public List<string> ImageURLs { get; set; }
 }

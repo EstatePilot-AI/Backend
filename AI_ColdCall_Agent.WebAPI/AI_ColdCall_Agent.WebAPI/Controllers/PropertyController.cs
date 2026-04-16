@@ -34,7 +34,35 @@ public class PropertyController : ControllerBase
 		_analyticsService = analyticsService;
 	}
 
-    [HttpGet("GetPropertyById/{id}")]
+	private string GetTimeAgo(DateTime date)
+	{
+		var timeDifference = DateTime.UtcNow - date;
+
+		if (timeDifference.TotalSeconds < 60)
+		{
+			return "Just now";
+		}
+
+		if (timeDifference.TotalMinutes < 60)
+		{
+			return $"{(int)timeDifference.TotalMinutes}m ago";
+		}
+
+		if (timeDifference.TotalHours < 24)
+		{
+			return $"{(int)timeDifference.TotalHours}h ago";
+		}
+
+		if (timeDifference.TotalDays < 7)
+		{
+			return $"{(int)timeDifference.TotalDays}d ago";
+		}
+
+		return date.ToString("MMM dd");
+	}
+
+
+	[HttpGet("GetPropertyById/{id}")]
     public async Task<IActionResult> GetPropertyById(int id)
     {
         var property = _unitOfWork.Properties.FindOneItem(
@@ -73,6 +101,8 @@ public class PropertyController : ControllerBase
             BuildingNumber = property.PropertiesLocation?.BuildingNumber ?? 0,
             FloorNumber = property.PropertiesLocation?.FloorNumber ?? 0,
             ApartmentNumber = property.PropertiesLocation?.ApartmentNumber ?? 0,
+            
+            CreatedAt=property.CreatedAt.ToShortDateString(),
 
 			ImageURLs = property.propertyImages?.Select(p => p.ImageURL).ToList()
 		};
@@ -96,7 +126,7 @@ public class PropertyController : ControllerBase
         }
 
 
-        var propertyResponses = properties.Select(p => new PropertyResponse
+        var propertyResponses = properties.OrderByDescending(p=>p.CreatedAt).Select(p => new PropertyResponse
         {
             PropertyId = p.PropertyId,
             Price = p.Price,
@@ -107,14 +137,13 @@ public class PropertyController : ControllerBase
 
             City = p.PropertiesLocation?.Country,
             District = p.PropertiesLocation?.City,
-
+            CreatedAt=GetTimeAgo(p.CreatedAt),
             ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
 
         }).ToList();
 
         return Ok(propertyResponses);
     }
-
 
 	[HttpGet("GetAllPropertiesWithDetails")]
 	public async Task<IActionResult> GetAllPropertiesWithDetails()
@@ -236,7 +265,7 @@ public class PropertyController : ControllerBase
 							Bathrooms = resultDto.propertyDTO?.PropertyInfo?.Bathrooms ?? 0,
 							DownPayment = resultDto.propertyDTO?.PropertyPayment?.DownPayment ?? 0,
 							Description = resultDto.propertyDTO?.PropertyInfo?.AdditionalInfo ?? string.Empty,
-
+                            CreatedAt= DateTime.UtcNow,
 							PropertiesLocation = new PropertiesLocation
                             {
                                 Country = resultDto.propertyDTO.PropertyLocation.Country ?? "مصر",
@@ -414,7 +443,7 @@ public class PropertyController : ControllerBase
 
     
         var properties = await _unitOfWork.Properties.FindAllWithIncludeAsync(
-            new string[] { "PropertyType", "FinishingType", "PropertiesLocation", "PropertyStatus" }
+            new string[] { "PropertyType", "FinishingType", "PropertiesLocation", "PropertyStatus", "propertyImages" }
         );
 
        
@@ -431,14 +460,20 @@ public class PropertyController : ControllerBase
         
         var response = filteredResults.Select(p => new PropertyResponse
         {
-            PropertyId = p.PropertyId,
-            Price = p.Price,
-            Area = p.Area,
-            PropertyType = p.PropertyType?.Name,
-            Status = p.PropertyStatus?.Name,
-            City = p.PropertiesLocation?.City,
-            District = p.PropertiesLocation?.District
-        }).ToList();
+			PropertyId = p.PropertyId,
+			Price = p.Price,
+			Area = p.Area,
+
+			PropertyType = p.PropertyType?.Name,
+			Status = p.PropertyStatus?.Name,
+
+			City = p.PropertiesLocation?.Country,
+			District = p.PropertiesLocation?.City,
+
+            CreatedAt=GetTimeAgo(p.CreatedAt),
+
+			ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
+		}).ToList();
 
         return Ok(response);
     }
