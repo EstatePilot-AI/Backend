@@ -1,8 +1,11 @@
-﻿using AI_ColdCall_Agent.Core.DTO;
+using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Models;
+using System.Linq.Expressions;
 
 namespace AI_ColdCall_Agent.WebAPI.Controllers
 {
@@ -20,71 +23,51 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
 
 
         [HttpGet("GetAllLeads")]
-        public async Task<IActionResult> GetAllLeads()
+        public async Task<IActionResult> GetAllLeads([FromQuery] LeadRequestFilterDto filter)
         {
-      
-            var leads = await _unitOfWork.LeadRequests.GetAllWithIncludesAsync(
-                l => l.Contact,
-                l => l.LeadRequestStatus
-            );
+            Expression<Func<Models.LeadRequest, bool>> predicate = l =>
+                (!filter.StatusId.HasValue || l.LeadRequestStatusId == filter.StatusId) &&
+                (string.IsNullOrWhiteSpace(filter.SearchTerm) ||
+                 l.BuyerName.Contains(filter.SearchTerm) ||
+                 (l.Contact != null && l.Contact.Phone.Contains(filter.SearchTerm)));
 
-            if (leads == null || !leads.Any())
+            var includes = new[] { "Contact", "LeadRequestStatus" };
+
+            var (items, totalCount) = await _unitOfWork.LeadRequests.GetPaginatedAsync(
+                predicate,
+                includes,
+                q => q.OrderByDescending(l => l.RequestId),
+                filter.PageNumber,
+                filter.PageSize);
+
+            var data = items.Select(l => new LeadRequestResponseDto
             {
-                return Ok(new { });
-            }
+                RequestId = l.RequestId,
+                BuyerName = l.BuyerName ?? "عميل غير مسجل",
+                BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
+                StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار",
+            }).ToList();
 
+            var result = new PaginatedResult<LeadRequestResponseDto>
+            {
+                Data = data,
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize,
+            };
 
-            var groupedLeads = leads
-                .Select(l => new LeadRequestResponseDto
-                {
-                    RequestId = l.RequestId,
-                    BuyerName = l.BuyerName ?? "عميل غير مسجل",
-                    BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
-                    StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار",
-                  
-                }).ToList();
-               
-
-            return Ok(groupedLeads);
+            return Ok(result);
         }
+
         [HttpGet("FilterLeads")]
-        public async Task<IActionResult> FilterLeads([FromQuery] int? statusId) 
+        public async Task<IActionResult> FilterLeads([FromQuery] LeadRequestFilterDto filter)
         {
-            
-            if (statusId == null || statusId <= 0)
-            {
-                return BadRequest("يجب إدخال معرف الحالة (ID) بشكل صحيح للفلترة.");
-            }
-
-            var leads = await _unitOfWork.LeadRequests.GetAllWithIncludesAsync(
-                l => l.Contact,
-                l => l.LeadRequestStatus
-            );
-
-          
-            var filteredResults = leads
-                .Where(l => l.LeadRequestStatusId == statusId)
-                .Select(l => new LeadRequestResponseDto
-                {
-                    RequestId = l.RequestId,
-                    BuyerName = l.BuyerName ?? "عميل غير مسجل",
-                    BuyerPhone = l.Contact?.Phone ?? "بدون رقم هاتف",
-                    StatusName = l.LeadRequestStatus?.Name ?? "قيد الانتظار"
-                })
-                .ToList();
-
-            if (!filteredResults.Any())
-            {
-                return Ok(new List<LeadRequestResponseDto>());
-            }
-
-            return Ok(filteredResults);
+            return await GetAllLeads(filter);
         }
 
         [HttpGet("GetStatusList")]
         public async Task<IActionResult> GetStatusList()
         {
-            
             var statuses = await _unitOfWork.LeadRequestStatuses.GetAllAsync();
 
             if (statuses == null || !statuses.Any())
@@ -92,7 +75,6 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                 return Ok(new List<StatusLookUpDto>());
             }
 
-           
             var response = statuses.Select(s => new StatusLookUpDto
             {
                 Id = s.Id,
@@ -115,7 +97,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                     status = "error",
                     error = new
                     {
-                        message = "No leads found to delete."
+                        message = "There are no leads to delete at the moment."
                     }
                 });
 			}
@@ -137,15 +119,14 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
         [HttpGet("GetLeadRequestById/{id}")]
         public async Task<IActionResult> GetLeadRequestById(int id)
         {
-            
             var includes = new string[]
             {
-        "Contact",               
-        "LeadRequestStatus",    
-        "Property",             
-        "Property.Contact",      
-        "Property.PropertyType", 
-        "Property.PropertiesLocation" 
+        "Contact",
+        "LeadRequestStatus",
+        "Property",
+        "Property.Contact",
+        "Property.PropertyType",
+        "Property.PropertiesLocation"
             };
 
             var lead = await _unitOfWork.LeadRequests.GetFirstOrDefaultWithStringsAsync(
@@ -155,8 +136,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
 
             if (lead == null)
             {
-                
-                return NotFound(new { message = $"Lead request with ID {id} was not found." });
+                return NotFound(new { message = $"We couldn't find a lead request with ID {id}. It may have been removed or doesn't exist." });
             }
 
             var response = new LeadRequestDto
@@ -165,7 +145,6 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
                 BuyerName = lead.Contact?.Name ?? "غير مسجل",
                 BuyerPhone = lead.Contact?.Phone ?? "لا يوجد رقم",
 
-             
                 SellerName = lead.Property?.Contact?.Name ?? "غير محدد",
                 SellerPhone = lead.Property?.Contact?.Phone ?? "غير محدد",
 
@@ -175,7 +154,6 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
 
                 Location = lead.Property?.PropertiesLocation?.City ?? "غير محدد",
 
-         
                 PropertyType = lead.Property?.PropertyType?.Name ?? "غير محدد",
 
                 StatusName = lead.LeadRequestStatus?.Name ?? "قيد الانتظار"

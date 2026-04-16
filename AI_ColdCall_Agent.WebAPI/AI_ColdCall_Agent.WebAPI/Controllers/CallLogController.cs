@@ -1,9 +1,11 @@
-﻿using AI_ColdCall_Agent.Core.DTO;
+using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using System.Linq.Expressions;
 
 namespace Controllers;
 
@@ -19,24 +21,26 @@ public class CallLogController : ControllerBase
 	}
 
 	[HttpGet("GetAllCallLogs")]
-	public async Task<IActionResult> GetAllCallLogs([FromQuery]int? callOutComeId)
+	public async Task<IActionResult> GetAllCallLogs([FromQuery] CallLogFilterDto filter)
 	{
-		var callLogs = await _unitOfWork.CallLogs.FindAllWithIncludeAsync(new string[] { "Contact", "CallOutcome", "SubjectTypeCall", "CallSessionState" });
+		Expression<Func<Models.CallLog, bool>> predicate = cl =>
+			(!filter.CallOutcomeId.HasValue || cl.CallOutcomeId == filter.CallOutcomeId) &&
+			(!filter.CallSessionStateId.HasValue || cl.CallSessionStateId == filter.CallSessionStateId) &&
+			(!filter.FromDate.HasValue || cl.Timestamp >= filter.FromDate.Value) &&
+			(!filter.ToDate.HasValue || cl.Timestamp <= filter.ToDate.Value.AddDays(1)) &&
+			(string.IsNullOrWhiteSpace(filter.SearchTerm) ||
+			 cl.ContactName.Contains(filter.SearchTerm));
 
-		if (callOutComeId.HasValue)
-		{
-			callLogs = callLogs.Where(cl => cl.CallOutcomeId == callOutComeId);
-		}
+		var includes = new[] { "Contact", "CallOutcome", "SubjectTypeCall", "CallSessionState" };
 
-		if(callLogs == null)
-		{
-			return NotFound(new
-			{
-				error = "There is no call Logs in the system"
-			});
-		}
+		var (items, totalCount) = await _unitOfWork.CallLogs.GetPaginatedAsync(
+			predicate,
+			includes,
+			q => q.OrderByDescending(cl => cl.Timestamp),
+			filter.PageNumber,
+			filter.PageSize);
 
-		var callLogsDto = callLogs.OrderByDescending(cl=>cl.Timestamp).Select(cl => new
+		var data = items.Select(cl => new
 		{
 			CallId = cl.CallId,
 			BuyerName = cl.ContactName,
@@ -45,9 +49,17 @@ public class CallLogController : ControllerBase
 			CallSessionState = cl.CallSessionState.Name,
 			Duration = cl.Duration,
 			TimeStamp = GetTimeAgo(cl.Timestamp)
-		});
+		}).ToList();
 
-		return Ok(callLogsDto);
+		var result = new PaginatedResult<object>
+		{
+			Data = data,
+			TotalCount = totalCount,
+			PageNumber = filter.PageNumber,
+			PageSize = filter.PageSize,
+		};
+
+		return Ok(result);
 	}
 
 	[HttpGet("GetCallOutcome")]
@@ -68,11 +80,11 @@ public class CallLogController : ControllerBase
 	[HttpGet("GetCallLogById/{id:int}")]
 	public async Task<IActionResult> GetCallLogById(int id)
 	{
-		if(id <= 0)
+		if (id <= 0)
 		{
 			return BadRequest(new
 			{
-				error = "Id must be more than 0"
+				error = "Please provide a valid call log ID (must be a positive number)."
 			});
 		}
 
@@ -82,7 +94,7 @@ public class CallLogController : ControllerBase
 		{
 			return NotFound(new
 			{
-				error = $"Call Log with Id: {id} not found"
+				error = $"We couldn't find a call log with ID {id}. It may have been deleted."
 			});
 		}
 
@@ -102,7 +114,7 @@ public class CallLogController : ControllerBase
 
 		return Ok(callLogDto);
 	}
-	//handle the time like just now, 1 minute ago and so on
+
 	private string GetTimeAgo(DateTime date)
 	{
 		var timeDifference = DateTime.UtcNow - date;
@@ -112,25 +124,21 @@ public class CallLogController : ControllerBase
 			return "Just now";
 		}
 
-		// Less than 1 hour ago
 		if (timeDifference.TotalMinutes < 60)
 		{
 			return $"{(int)timeDifference.TotalMinutes}m ago";
 		}
 
-		// Less than 24 hours ago
 		if (timeDifference.TotalHours < 24)
 		{
 			return $"{(int)timeDifference.TotalHours}h ago";
 		}
 
-		// Less than 7 days ago (optional extension)
 		if (timeDifference.TotalDays < 7)
 		{
 			return $"{(int)timeDifference.TotalDays}d ago";
 		}
 
-		// Fallback for older dates (e.g., "Oct 24")
 		return date.ToString("MMM dd");
 	}
 
@@ -148,12 +156,12 @@ public class CallLogController : ControllerBase
 				status = "error",
 				error = new
 				{
-					message = "No call logs found to delete."
+					message = "There are no call logs to delete at the moment."
 				}
 			});
 		}
 
-		foreach(var callLog in callLogs)
+		foreach (var callLog in callLogs)
 		{
 			_unitOfWork.CallLogs.Delete(callLog);
 		}
@@ -166,69 +174,62 @@ public class CallLogController : ControllerBase
 			message = "All call logs have been deleted successfully."
 		});
 	}
-    [HttpGet("GetCallLogsCountWithDetails")]
-    public async Task<IActionResult> GetCallLogsCountWithDetails(int? day, int? month, int? year, string outcome = null)
-    {
-       
-        var allLogs = await _unitOfWork.CallLogs.GetAllWithIncludesAsync(
-            c => c.CallOutcome,
-            c => c.SubjectTypeCall,
-            c => c.CallSessionState
-        );
 
-       
-        var availableStatuses = allLogs
-                                .Where(c => c.CallOutcome != null)
-                                .Select(c => c.CallOutcome.Name)
-                                .Distinct()
-                                .ToList();
+	[HttpGet("GetCallLogsCountWithDetails")]
+	public async Task<IActionResult> GetCallLogsCountWithDetails(int? day, int? month, int? year, string outcome = null)
+	{
+		var allLogs = await _unitOfWork.CallLogs.GetAllWithIncludesAsync(
+			c => c.CallOutcome,
+			c => c.SubjectTypeCall,
+			c => c.CallSessionState
+		);
 
-        var filteredQuery = allLogs.AsQueryable();
+		var availableStatuses = allLogs
+								.Where(c => c.CallOutcome != null)
+								.Select(c => c.CallOutcome.Name)
+								.Distinct()
+								.ToList();
 
-        if (year.HasValue && year > 0)
-            filteredQuery = filteredQuery.Where(c => c.Timestamp.Year == year);
+		var filteredQuery = allLogs.AsQueryable();
 
-        if (month.HasValue && month > 0)
-            filteredQuery = filteredQuery.Where(c => c.Timestamp.Month == month);
+		if (year.HasValue && year > 0)
+			filteredQuery = filteredQuery.Where(c => c.Timestamp.Year == year);
 
-        if (day.HasValue && day > 0)
-            filteredQuery = filteredQuery.Where(c => c.Timestamp.Day == day);
+		if (month.HasValue && month > 0)
+			filteredQuery = filteredQuery.Where(c => c.Timestamp.Month == month);
 
-    
-        if (!string.IsNullOrWhiteSpace(outcome) && outcome.ToLower() != "all")
-        {
-            
-            filteredQuery = filteredQuery.Where(c => c.CallOutcome != null &&
-                                                     c.CallOutcome.Name.Trim().ToLower() == outcome.Trim().ToLower());
-        }
+		if (day.HasValue && day > 0)
+			filteredQuery = filteredQuery.Where(c => c.Timestamp.Day == day);
 
-     
-        var filteredList = filteredQuery.ToList();
+		if (!string.IsNullOrWhiteSpace(outcome) && outcome.ToLower() != "all")
+		{
+			filteredQuery = filteredQuery.Where(c => c.CallOutcome != null &&
+													 c.CallOutcome.Name.Trim().ToLower() == outcome.Trim().ToLower());
+		}
 
-        var details = filteredList.Select(cl => new
-        {
-            cl.CallId,
-            cl.ContactName,
-            Outcome = cl.CallOutcome?.Name ?? "N/A",
-            Type = cl.SubjectTypeCall?.Name ?? "N/A",
-            Status = cl.CallSessionState?.Name ?? "N/A",
-            cl.Duration,
-            ExactTime = cl.Timestamp.ToString("yyyy-MM-dd"),
-            
-        }).ToList();
+		var filteredList = filteredQuery.ToList();
 
-        return Ok(new
-        {
-            AvailableStatuses = availableStatuses,
-            TotalCount = details.Count, 
-            FilterApplied = new
-            {
-               
-                Status = string.IsNullOrWhiteSpace(outcome) ? "All" : outcome
-            },
-            Data = details 
-        });
-    }
+		var details = filteredList.Select(cl => new
+		{
+			cl.CallId,
+			cl.ContactName,
+			Outcome = cl.CallOutcome?.Name ?? "N/A",
+			Type = cl.SubjectTypeCall?.Name ?? "N/A",
+			Status = cl.CallSessionState?.Name ?? "N/A",
+			cl.Duration,
+			ExactTime = cl.Timestamp.ToString("yyyy-MM-dd"),
+		}).ToList();
+
+		return Ok(new
+		{
+			AvailableStatuses = availableStatuses,
+			TotalCount = details.Count,
+			FilterApplied = new
+			{
+				Status = string.IsNullOrWhiteSpace(outcome) ? "All" : outcome
+			},
+			Data = details
+		});
+	}
 
 }
-

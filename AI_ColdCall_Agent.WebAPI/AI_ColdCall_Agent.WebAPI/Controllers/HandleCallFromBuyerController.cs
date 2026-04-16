@@ -1,4 +1,4 @@
-﻿using DTO;
+using DTO;
 using Identity;
 using Interfaces;
 using IServices;
@@ -47,7 +47,7 @@ public class HandleCallFromBuyerController : ControllerBase
 					status="error",
 					error = new
 					{
-						message= $"LeadRequest with ID {resultDto.leadID} not found."
+						message= "We couldn't find the lead request linked to this call. It may have been removed."
 					}
 				});
 			}
@@ -155,7 +155,7 @@ public class HandleCallFromBuyerController : ControllerBase
 			}
 			catch(Exception ex)
 			{
-				return BadRequest(ex.Message);
+				return BadRequest("Something went wrong while processing the call outcome. Please try again later.");
 			}
 			finally
 			{

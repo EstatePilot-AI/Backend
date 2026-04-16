@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Controllers;
@@ -30,7 +30,7 @@ public class GetConversationData : ControllerBase
 					status = "error",
 					error = new
 					{
-						message = $"No data found for ID {id}."
+						message = $"No conversation data found for ID {id}. Please verify the ID and try again."
 					}
 				});
 			}
@@ -48,7 +48,7 @@ public class GetConversationData : ControllerBase
 				status = "error",
 				error = new
 				{
-					message = $"Failed to retrieve data for ID {id}: {ex.Message}"
+					message = "We couldn't retrieve the conversation data right now. Please try again later."
 				}
 			});
 		}
@@ -76,7 +76,7 @@ public class GetConversationData : ControllerBase
 				status = "error",
 				error = new
 				{
-					message = $"Failed to retrieve audio for ID {id}. Status code: {response.StatusCode}"
+					message = "We couldn't retrieve the audio recording right now. Please try again later."
 				}
 			});
 		}
@@ -87,7 +87,7 @@ public class GetConversationData : ControllerBase
 				status = "error",
 				error = new
 				{
-					message = $"Failed to retrieve audio for ID {id}: {ex.Message}"
+					message = "We couldn't retrieve the audio recording right now. Please try again later."
 				}
 			});
 		}

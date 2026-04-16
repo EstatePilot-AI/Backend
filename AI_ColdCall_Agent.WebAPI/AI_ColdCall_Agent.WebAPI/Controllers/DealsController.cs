@@ -1,4 +1,4 @@
-﻿using DTO;
+using DTO;
 using Identity;
 using Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -57,7 +57,7 @@ public class DealsController : ControllerBase
 			return NotFound(new
 			{
 				status = "error",
-				message = "Agent is not found"
+				message = "Your agent account could not be found. Please log in again."
 			});
 		}
 
@@ -113,7 +113,7 @@ public class DealsController : ControllerBase
 			return NotFound(new
 			{
 				status = "error",
-				message = "Agent is not found"
+				message = "Your agent account could not be found. Please log in again."
 			});
 		}
 		var deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == agent.Id && d.DealStatusId == id, new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
@@ -145,7 +145,7 @@ public class DealsController : ControllerBase
 			return NotFound(new
 			{
 				status = "error",
-				message = "Deal is not found"
+				message = "We couldn't find the deal you're looking for. It may have been removed."
 			});
 		}
 
@@ -179,7 +179,7 @@ public class DealsController : ControllerBase
 			return NotFound(new
 			{
 				status = "error",
-				message = "Deal is not found"
+				message = "We couldn't find the deal you're looking for. It may have been removed."
 			});
 		}
 
