@@ -81,6 +81,15 @@ public class HandleCallFromBuyerController : ControllerBase
 							callLog.CallOutcomeId = 1; // Interested
 							leadRequest.LeadRequestStatusId = 4; //Qualified for property
 
+							if(resultDto.propertyId != null)
+							{
+								var property = _unitOfWork.Properties.FindOneItem(p=>p.PropertyId==int.Parse(resultDto.propertyId), new string[] { "PropertiesLocation", "Contact" });
+								if(property != null)
+								{
+									leadRequest.PropertyId = property.PropertyId; //associate the lead request with the property if the AI provided a property ID
+									_unitOfWork.Save();
+								}
+							}
 							// Logic to schedule a deal
 							await HandleAcceptance(leadRequest);
 

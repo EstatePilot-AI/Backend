@@ -1,5 +1,6 @@
 ﻿using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -17,6 +18,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
 			_analyticsService = analyticsService;
 		}
 
+		[Authorize]
         [HttpGet("GetGlobalAnalytics")]
         public async Task<IActionResult> GetGlobalAnalytics(int? day, int? month, int? year, string? outcomeName = null)
         {
