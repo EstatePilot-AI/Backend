@@ -1,4 +1,4 @@
-﻿using DatabaseContext;
+using DatabaseContext;
 using Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -148,6 +148,40 @@ namespace Repositories
                 }
             }
             return await query.FirstOrDefaultAsync(criteria);
+        }
+
+        public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaginatedAsync(
+            Expression<Func<T, bool>> filter,
+            string[] includes,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
+            int pageNumber,
+            int pageSize)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            query = query.Where(filter);
+
+            var totalCount = await query.CountAsync();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
     }
