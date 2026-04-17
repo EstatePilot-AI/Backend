@@ -21,9 +21,9 @@ public class HandleCallFromBuyerController : ControllerBase
 	private readonly UserManager<ApplicationUser> _userManager;
 	private readonly EmailSender _emailSender;
 	private readonly IHubContext<DashboardHub> _hubContext;
-	private readonly DashboardAnalyticsService _analyticsService;
+	private readonly IDashboardAnalyticsService _analyticsService;
 
-	public HandleCallFromBuyerController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, UserManager<ApplicationUser> userManager, EmailSender emailSender, IHubContext<DashboardHub> hubContext, DashboardAnalyticsService analyticsService)
+	public HandleCallFromBuyerController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, UserManager<ApplicationUser> userManager, EmailSender emailSender, IHubContext<DashboardHub> hubContext, IDashboardAnalyticsService analyticsService)
 	{
 		_unitOfWork = unitOfWork;
 		_queue = queue;
@@ -139,8 +139,7 @@ public class HandleCallFromBuyerController : ControllerBase
 				_unitOfWork.Save();
 
 				// Build fresh analytics and push to all dashboard clients
-				var analytics = await _analyticsService.BuildAnalyticsAsync(
-					day: null, month: null, year: null);
+				var analytics = await _analyticsService.BuildAnalyticsAsync(null);
 
 				if (analytics != null)
 					await _hubContext.Clients.Group("dashboard").SendAsync("ReceiveDashboardUpdate", analytics);

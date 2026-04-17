@@ -22,9 +22,9 @@ public class PropertyController : ControllerBase
 	private readonly EmailSender _emailSender;
 	private readonly IWebHostEnvironment _env;
 	private readonly IHubContext<DashboardHub> _hubContext;
-	private readonly DashboardAnalyticsService _analyticsService;
+	private readonly IDashboardAnalyticsService _analyticsService;
 
-	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender, IWebHostEnvironment env, IHubContext<DashboardHub> hubContext, DashboardAnalyticsService analyticsService)
+	public PropertyController(IUnitOfWork unitOfWork, IBackgroundTaskQueue queue, EmailSender emailSender, IWebHostEnvironment env, IHubContext<DashboardHub> hubContext, IDashboardAnalyticsService analyticsService)
     {
         _unitOfWork = unitOfWork;
 		_queue = queue;
@@ -113,12 +113,15 @@ public class PropertyController : ControllerBase
     [HttpGet("GetAllProperties")]
     public async Task<IActionResult> GetAllProperties()
     {
-        var properties = await _unitOfWork.Properties.GetAllWithIncludesAsync(
-            p => p.PropertyType,
-            p => p.PropertyStatus,
-            p => p.PropertiesLocation,
-            p => p.propertyImages
-        );
+        var properties = await _unitOfWork.Properties.FindAllAsync(p=>p.PropertyStatusId==1,
+		   new string[] {
+			"PropertyType",
+			"PropertyStatus",
+			"FinishingType",
+			"PropertiesLocation",
+			"propertyImages"
+			}
+		);
 
         if (properties == null || !properties.Any())
         {
@@ -148,12 +151,14 @@ public class PropertyController : ControllerBase
 	[HttpGet("GetAllPropertiesWithDetails")]
 	public async Task<IActionResult> GetAllPropertiesWithDetails()
 	{
-		var properties = await _unitOfWork.Properties.GetAllWithIncludesAsync(
-			p => p.PropertyType,
-			p => p.PropertyStatus,
-            p => p.FinishingType,
-			p => p.PropertiesLocation,
-			p => p.propertyImages
+		var properties = await _unitOfWork.Properties.FindAllAsync(p => p.PropertyStatusId == 1,
+		   new string[] {
+			"PropertyType",
+			"PropertyStatus",
+			"FinishingType",
+			"PropertiesLocation",
+			"propertyImages"
+			}
 		);
 
 		if (properties == null || !properties.Any())
@@ -329,8 +334,7 @@ public class PropertyController : ControllerBase
 			_unitOfWork.Save();
 
 			// Build fresh analytics and push to all dashboard clients
-			var analytics = await _analyticsService.BuildAnalyticsAsync(
-				day: null, month: null, year: null);
+			var analytics = await _analyticsService.BuildAnalyticsAsync(null);
 
             if (analytics != null)
                 await _hubContext.Clients.Group("dashboard").SendAsync("ReceiveDashboardUpdate", analytics);
@@ -442,8 +446,14 @@ public class PropertyController : ControllerBase
         }
 
     
-        var properties = await _unitOfWork.Properties.FindAllWithIncludeAsync(
-            new string[] { "PropertyType", "FinishingType", "PropertiesLocation", "PropertyStatus", "propertyImages" }
+        var properties = await _unitOfWork.Properties.FindAllAsync(p=>p.PropertyStatusId==1,
+		   new string[] {
+			"PropertyType",
+			"PropertyStatus",
+			"FinishingType",
+			"PropertiesLocation",
+			"propertyImages"
+			}
         );
 
        

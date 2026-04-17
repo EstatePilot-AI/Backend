@@ -1,11 +1,14 @@
 using DTO;
 using Identity;
 using Interfaces;
+using IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Models;
+using Services;
 using System.Security.Claims;
 
 namespace Controllers;
@@ -16,11 +19,15 @@ public class DealsController : ControllerBase
 {
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly UserManager<ApplicationUser> _userManager;
+	private readonly IDashboardAnalyticsService _analyticsService;
+	private readonly IHubContext<DashboardHub> _hubContext;
 
-	public DealsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+	public DealsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IDashboardAnalyticsService analyticsService, IHubContext<DashboardHub> hubContext)
 	{
 		_unitOfWork = unitOfWork;
 		_userManager = userManager;
+		_analyticsService = analyticsService;
+		_hubContext = hubContext;
 	}
 
 	[Authorize(Roles = "superadmin,agent")]
@@ -119,6 +126,12 @@ public class DealsController : ControllerBase
 
 		_unitOfWork.Deals.Update(deal);
 		_unitOfWork.Save();
+
+		// Build fresh analytics and push to all dashboard clients
+		var analytics = await _analyticsService.BuildAnalyticsAsync(null);
+
+		if (analytics != null)
+			await _hubContext.Clients.Group("dashboard").SendAsync("ReceiveDashboardUpdate", analytics);
 
 		return Ok(new
 		{
