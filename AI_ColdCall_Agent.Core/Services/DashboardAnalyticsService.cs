@@ -1,5 +1,6 @@
 using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
+using IServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text;
 namespace Services;
 
 /// <inheritdoc cref="IServices.IDashboardAnalyticsService"/>
-public class DashboardAnalyticsService : IServices.IDashboardAnalyticsService
+public class DashboardAnalyticsService : IDashboardAnalyticsService
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -67,21 +68,32 @@ public class DashboardAnalyticsService : IServices.IDashboardAnalyticsService
             .OrderByDescending(x => x.Count)
             .ToList();
 
-        return new DashboardAnalyticsResponse
+		// Calculate revenue and deal count for successful deals (assuming DealStatusId == 2 indicates completed)
+		var successfulDeals = await _unitOfWork.Deals.FindAllAsync(d => d.DealStatusId == 2);
+        var totalRevenue = successfulDeals.Sum(d => d.FinalSaleAmount);
+        var dealCount= successfulDeals.Count();
+
+
+		return new DashboardAnalyticsResponse
         {
             KeyMetrics = new KeyMetricsDto
             {
                 TotalEngagements = totalEngagements,
                 QualifiedLeads = logs.Count(l =>
                     l.CallOutcome?.Name?.ToLower() == "interested"),
-                ConversionRate = Math.Round(
+                CallConversionRate = Math.Round(
                     (double)logs.Count(l => l.CallOutcome?.Name?.ToLower() == "interested")
                     / totalEngagements * 100, 1),
                 ResourceOptimizationHours = Math.Round(
                     (double)logs.Sum(l => l.Duration) / 60, 1),
                 AverageHandlingTime = Math.Round(
-                    (double)logs.Average(l => l.Duration), 2)
-            },
+                    (double)logs.Average(l => l.Duration), 2),
+
+                TotalRevenue = totalRevenue,
+                AverageDealValue = dealCount > 0 ? Math.Round(totalRevenue / dealCount, 2) : 0,
+                DealConversionRate = Math.Round((double)dealCount / logs.Count() * 100, 1)
+
+			},
             OutcomeDistributions = outcomeDistributions,
             PeakActivityTrends = hourlyTrends,
             PropertyInventoryStatus = propertyInventory,

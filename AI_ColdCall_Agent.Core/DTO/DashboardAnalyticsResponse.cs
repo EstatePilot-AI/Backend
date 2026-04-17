@@ -44,6 +44,7 @@ namespace AI_ColdCall_Agent.Core.DTO
         /// <example>2026-04-17T14:30:00Z</example>
         [JsonPropertyName("generatedAt")]
         public DateTime GeneratedAt { get; set; }
+
     }
 
     /// <summary>
@@ -70,8 +71,8 @@ namespace AI_ColdCall_Agent.Core.DTO
         /// Range: 0.0 – 100.0.
         /// </summary>
         /// <example>27.4</example>
-        [JsonPropertyName("conversionRate")]
-        public double ConversionRate { get; set; }
+        [JsonPropertyName("callConversionRate")]
+        public double CallConversionRate { get; set; }
 
         /// <summary>
         /// Estimated hours saved through AI-driven automation (total call duration in hours).
@@ -86,7 +87,25 @@ namespace AI_ColdCall_Agent.Core.DTO
         /// <example>127.45</example>
         [JsonPropertyName("averageHandlingTime")]
         public double AverageHandlingTime { get; set; }
-    }
+
+		/// <summary>
+		/// Total monetary value of all closed deals.
+		/// </summary>
+		[JsonPropertyName("totalRevenue")]
+		public decimal TotalRevenue { get; set; }
+
+		/// <summary>
+		/// Average value per successful deal.
+		/// </summary>
+		[JsonPropertyName("averageDealValue")]
+		public decimal AverageDealValue { get; set; }
+
+		/// <summary>
+        /// Gets or sets the conversion rate for deals as a percentage.
+        /// </summary>
+		[JsonPropertyName("dealConversionRate")]
+		public double DealConversionRate { get; set; }
+	}
 
     /// <summary>
     /// A single slice in the call outcome distribution (pie/donut chart).
