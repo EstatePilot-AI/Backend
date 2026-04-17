@@ -17,10 +17,18 @@ namespace AI_ColdCall_Agent.Core.DTO
             set => _pageSize = value < 1 ? 10 : (value > 50 ? 50 : value);
         }
 
-        public int? CallOutcomeId { get; set; }
+        public CallLogOutcome? CallOutcomeId { get; set; }
         public int? CallSessionStateId { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string? SearchTerm { get; set; }
     }
+
+    public enum CallLogOutcome
+    {
+        Interested=1,
+        NotInterested=2,
+        NotAnswer=3,
+        Failed= 4
+	}
 }

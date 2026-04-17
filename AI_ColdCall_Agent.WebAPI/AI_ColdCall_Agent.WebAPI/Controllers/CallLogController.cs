@@ -25,7 +25,7 @@ public class CallLogController : ControllerBase
 	public async Task<IActionResult> GetAllCallLogs([FromQuery] CallLogFilterDto filter)
 	{
 		Expression<Func<Models.CallLog, bool>> predicate = cl =>
-			(!filter.CallOutcomeId.HasValue || cl.CallOutcomeId == filter.CallOutcomeId) &&
+			(!filter.CallOutcomeId.HasValue || cl.CallOutcomeId == (int)filter.CallOutcomeId.Value) &&
 			(!filter.CallSessionStateId.HasValue || cl.CallSessionStateId == filter.CallSessionStateId) &&
 			(!filter.FromDate.HasValue || cl.Timestamp >= filter.FromDate.Value) &&
 			(!filter.ToDate.HasValue || cl.Timestamp <= filter.ToDate.Value.AddDays(1)) &&
