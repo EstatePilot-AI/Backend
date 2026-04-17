@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using System.Security.Claims;
 
 namespace Controllers;
 
@@ -22,70 +23,72 @@ public class DealsController : ControllerBase
 		_userManager = userManager;
 	}
 
-	[Authorize(Roles = "superadmin")]
+	[Authorize(Roles = "superadmin,agent")]
 	[HttpGet("GetAllDeals")]
-	public async Task<IActionResult> GetAllDeals([FromQuery]int? dealStatusId)
+	public async Task<IActionResult> GetAllDeals([FromQuery] DealStatus? dealStatusId)
 	{
-		var deals = await _unitOfWork.Deals.FindAllWithIncludeAsync(new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
+		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		var role = User.IsInRole("superadmin")? "superadmin" : "agent";
 
-		if (dealStatusId.HasValue)
+		if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+		IEnumerable<Deal> deals;
+		IEnumerable<Object> dealsResponse = [];
+		switch (role)
 		{
-			deals = deals.Where(d => d.DealStatusId == dealStatusId);
+			case "superadmin":
+				{
+					deals = await _unitOfWork.Deals.FindAllWithIncludeAsync(new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
+					
+					if (dealStatusId.HasValue)
+					{
+						deals = deals.Where(d => d.DealStatusId == (int)dealStatusId.Value);
+					}
+
+
+					dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
+					{
+						DealId = d.DealId,
+						Buyer = d.BuyerContact.Name,
+						Seller = d.SellerContact.Name,
+						Agent = d.Agent.Name,
+						MeetingDate = d.MeetingDate.ToShortDateString(),
+						MeetingLocation = d.MeetingLocation,
+						MeetingStatus = d.MeetingStatus.Name,
+						DealStatus = d.DealStatus.Name,
+						FinalSaleAmount = d.FinalSaleAmount,
+						DealDate = d.DealDate.ToShortDateString()
+					});
+
+					break;
+				}
+			case "agent":
+				{
+					deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == Guid.Parse(userId), new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
+
+					if (dealStatusId.HasValue)
+					{
+						deals = deals.Where(d => d.DealStatusId == (int)dealStatusId.Value);
+					}
+
+
+					dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
+					{
+						DealId = d.DealId,
+						Buyer = d.BuyerContact.Name,
+						Seller = d.SellerContact.Name,
+						MeetingDate = d.MeetingDate.ToShortDateString(),
+						MeetingLocation = d.MeetingLocation,
+						MeetingStatus = d.MeetingStatus.Name,
+						DealStatus = d.DealStatus.Name,
+						FinalSaleAmout = d.FinalSaleAmount,
+						DealDate = d.DealDate.ToShortDateString()
+					});
+					break;
+				}
+			
 		}
 
-
-		var dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new DealDto
-		{
-			DealId = d.DealId,
-			Buyer = d.BuyerContact.Name,
-			Seller = d.SellerContact.Name,
-			Agent = d.Agent.Name,
-			MeetingDate = d.MeetingDate.ToShortDateString(),
-			MeetingLocation = d.MeetingLocation,
-			MeetingStatus = d.MeetingStatus.Name,
-			DealStatus = d.DealStatus.Name,
-			FinalSaleAmount = d.FinalSaleAmount,
-			DealDate = d.DealDate.ToShortDateString()
-		});
-
-		return Ok(dealsResponse);
-	}
-
-	[Authorize(Roles = "agent")]
-	[HttpGet("GetAllDealsPerAgent")]
-	public async Task<IActionResult> GetAllDealsPerAgent([FromQuery] int? dealStatusId)
-	{
-		var agent = await _userManager.GetUserAsync(User);
-
-		if (agent == null)
-		{
-			return NotFound(new
-			{
-				status = "error",
-				message = "Your agent account could not be found. Please log in again."
-			});
-		}
-
-		var deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == agent.Id, new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
-
-		if (dealStatusId.HasValue)
-		{
-			deals = deals.Where(d => d.DealStatusId == dealStatusId);
-		}
-
-
-		var dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
-		{
-			DealId = d.DealId,
-			Buyer = d.BuyerContact.Name,
-			Seller = d.SellerContact.Name,
-			MeetingDate = d.MeetingDate.ToShortDateString(),
-			MeetingLocation = d.MeetingLocation,
-			MeetingStatus = d.MeetingStatus.Name,
-			DealStatus = d.DealStatus.Name,
-			FinalSaleAmout = d.FinalSaleAmount,
-			DealDate = d.DealDate.ToShortDateString()
-		});
 
 		return Ok(dealsResponse);
 	}
@@ -158,17 +161,11 @@ public class DealsController : ControllerBase
 
 	}
 
-	[HttpGet("GetDealStatus")]
-	public async Task<IActionResult> GetDealStatus()
-	{
-		var statuses = await _unitOfWork.DealStatuses.GetAllAsync();
+}
 
-		var response = statuses.Select(s => new
-		{
-			Id = s.Id,
-			Name = s.Name
-		}).ToList();
-
-		return Ok(response);
-	}
+public enum DealStatus
+{
+	InProgress = 1,
+	Completed = 2,
+	Canceled = 3
 }
