@@ -43,10 +43,6 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
         /// <response code="403">Forbidden — requires the <c>superadmin</c> role.</response>
         [Authorize(Roles = "superadmin")]
         [HttpGet("GetGlobalAnalytics")]
-        [ProducesResponseType(typeof(DashboardAnalyticsResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<DashboardAnalyticsResponse>> GetGlobalAnalytics(
             [FromQuery] GlobalAnalyticsRequest request)
         {
