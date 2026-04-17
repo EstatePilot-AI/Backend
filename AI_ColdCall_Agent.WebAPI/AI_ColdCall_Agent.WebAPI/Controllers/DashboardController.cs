@@ -18,8 +18,8 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
 			_analyticsService = analyticsService;
 		}
 
-		[Authorize]
-        [HttpGet("GetGlobalAnalytics")]
+		[Authorize(Roles = "superadmin")]
+		[HttpGet("GetGlobalAnalytics")]
         public async Task<IActionResult> GetGlobalAnalytics(int? day, int? month, int? year, string? outcomeName = null)
         {
 

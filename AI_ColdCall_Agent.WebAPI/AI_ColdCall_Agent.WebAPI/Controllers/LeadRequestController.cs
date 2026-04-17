@@ -21,8 +21,8 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-
-        [HttpGet("GetAllLeads")]
+		[Authorize(Roles = "superadmin")]
+		[HttpGet("GetAllLeads")]
         public async Task<IActionResult> GetAllLeads([FromQuery] LeadRequestFilterDto filter)
         {
             Expression<Func<Models.LeadRequest, bool>> predicate = l =>
@@ -64,6 +64,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
         {
             return await GetAllLeads(filter);
         }
+
 
         [HttpGet("GetStatusList")]
         public async Task<IActionResult> GetStatusList()
@@ -116,7 +117,8 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             });
 		}
 
-        [HttpGet("GetLeadRequestById/{id}")]
+		[Authorize(Roles = "superadmin")]
+		[HttpGet("GetLeadRequestById/{id}")]
         public async Task<IActionResult> GetLeadRequestById(int id)
         {
             var includes = new string[]

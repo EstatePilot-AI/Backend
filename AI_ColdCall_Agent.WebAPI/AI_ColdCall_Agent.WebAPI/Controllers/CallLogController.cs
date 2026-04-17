@@ -20,6 +20,7 @@ public class CallLogController : ControllerBase
 		_unitOfWork = unitOfWork;
 	}
 
+	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetAllCallLogs")]
 	public async Task<IActionResult> GetAllCallLogs([FromQuery] CallLogFilterDto filter)
 	{
@@ -77,6 +78,7 @@ public class CallLogController : ControllerBase
 		return Ok(response);
 	}
 
+	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetCallLogById/{id:int}")]
 	public async Task<IActionResult> GetCallLogById(int id)
 	{
@@ -175,6 +177,7 @@ public class CallLogController : ControllerBase
 		});
 	}
 
+	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetCallLogsCountWithDetails")]
 	public async Task<IActionResult> GetCallLogsCountWithDetails(int? day, int? month, int? year, string outcome = null)
 	{

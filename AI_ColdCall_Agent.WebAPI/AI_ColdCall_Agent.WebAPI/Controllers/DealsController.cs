@@ -24,12 +24,17 @@ public class DealsController : ControllerBase
 
 	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetAllDeals")]
-	public async Task<IActionResult> GetAllDeals()
+	public async Task<IActionResult> GetAllDeals([FromQuery]int? dealStatusId)
 	{
 		var deals = await _unitOfWork.Deals.FindAllWithIncludeAsync(new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
 
+		if (dealStatusId.HasValue)
+		{
+			deals = deals.Where(d => d.DealStatusId == dealStatusId);
+		}
 
-		var dealsResponse = deals?.OrderBy(d => d.DealDate).Select(d => new DealDto
+
+		var dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new DealDto
 		{
 			DealId = d.DealId,
 			Buyer = d.BuyerContact.Name,
@@ -46,9 +51,9 @@ public class DealsController : ControllerBase
 		return Ok(dealsResponse);
 	}
 
-	[Authorize]
+	[Authorize(Roles = "agent")]
 	[HttpGet("GetAllDealsPerAgent")]
-	public async Task<IActionResult> GetAllDealsPerAgent()
+	public async Task<IActionResult> GetAllDealsPerAgent([FromQuery] int? dealStatusId)
 	{
 		var agent = await _userManager.GetUserAsync(User);
 
@@ -63,62 +68,13 @@ public class DealsController : ControllerBase
 
 		var deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == agent.Id, new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
 
-
-		var dealsResponse = deals?.OrderBy(d => d.DealDate).Select(d => new
+		if (dealStatusId.HasValue)
 		{
-			DealId = d.DealId,
-			Buyer = d.BuyerContact.Name,
-			Seller = d.SellerContact.Name,
-			MeetingDate = d.MeetingDate.ToShortDateString(),
-			MeetingLocation = d.MeetingLocation,
-			MeetingStatus = d.MeetingStatus.Name,
-			DealStatus = d.DealStatus.Name,
-			FinalSaleAmout = d.FinalSaleAmount,
-			DealDate = d.DealDate.ToShortDateString()
-		});
-
-		return Ok(dealsResponse);
-	}
-
-	[Authorize(Roles ="superadmin")]
-	[HttpGet("FilterDealsByStatus/{id:int}")]
-	public async Task<IActionResult> FilterDealsByStatus(int id)
-	{
-		var deals = await _unitOfWork.Deals.FindAllAsync(d => d.DealStatusId == id, new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
-
-		var dealsResponse = deals?.OrderBy(d => d.DealDate).Select(d => new DealDto
-		{
-			DealId = d.DealId,
-			Buyer = d.BuyerContact.Name,
-			Seller = d.SellerContact.Name,
-			Agent = d.Agent.Name,
-			MeetingDate = d.MeetingDate.ToShortDateString(),
-			MeetingLocation = d.MeetingLocation,
-			MeetingStatus = d.MeetingStatus.Name,
-			DealStatus = d.DealStatus.Name,
-			FinalSaleAmount = d.FinalSaleAmount,
-			DealDate = d.DealDate.ToShortDateString()
-		});
-
-		return Ok(dealsResponse);
-	}
-
-	[Authorize]
-	[HttpGet("FilterDealsByStatusPerAgent/{id:int}")]
-	public async Task<IActionResult> FilterDealsByStatusPerAgent(int id)
-	{
-		var agent = await _userManager.GetUserAsync(User);
-		if (agent == null)
-		{
-			return NotFound(new
-			{
-				status = "error",
-				message = "Your agent account could not be found. Please log in again."
-			});
+			deals = deals.Where(d => d.DealStatusId == dealStatusId);
 		}
-		var deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == agent.Id && d.DealStatusId == id, new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
 
-		var dealsResponse = deals?.OrderBy(d => d.DealDate).Select(d => new
+
+		var dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
 		{
 			DealId = d.DealId,
 			Buyer = d.BuyerContact.Name,
@@ -200,5 +156,19 @@ public class DealsController : ControllerBase
 			message = "Deal canceled successfully"
 		});
 
+	}
+
+	[HttpGet("GetDealStatus")]
+	public async Task<IActionResult> GetDealStatus()
+	{
+		var statuses = await _unitOfWork.DealStatuses.GetAllAsync();
+
+		var response = statuses.Select(s => new
+		{
+			Id = s.Id,
+			Name = s.Name
+		}).ToList();
+
+		return Ok(response);
 	}
 }
