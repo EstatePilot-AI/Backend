@@ -1,3 +1,4 @@
+using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Identity;
 using Interfaces;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Models;
 using Services;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace Controllers;
@@ -32,7 +34,7 @@ public class DealsController : ControllerBase
 
 	[Authorize(Roles = "superadmin,agent")]
 	[HttpGet("GetAllDeals")]
-	public async Task<IActionResult> GetAllDeals([FromQuery] DealStatus? dealStatusId)
+	public async Task<IActionResult> GetAllDeals([FromQuery] DealsFilterDto filter)
 	{
 		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		var role = User.IsInRole("superadmin")? "superadmin" : "agent";
@@ -40,20 +42,29 @@ public class DealsController : ControllerBase
 		if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
 		IEnumerable<Deal> deals;
+		int totalCount = 0;
 		IEnumerable<Object> dealsResponse = [];
+
+		var includes = new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" };
+
 		switch (role)
 		{
 			case "superadmin":
 				{
-					deals = await _unitOfWork.Deals.FindAllWithIncludeAsync(new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
-					
-					if (dealStatusId.HasValue)
-					{
-						deals = deals.Where(d => d.DealStatusId == (int)dealStatusId.Value);
-					}
+					Expression<Func<Deal, bool>> predicate = d => !filter.DealStatusId.HasValue || d.DealStatusId == (int)filter.DealStatusId.Value;
+
+					var result = await _unitOfWork.Deals.GetPaginatedAsync(
+						predicate,
+						includes,
+						q => q.OrderByDescending(d => d.DealDate),
+						filter.PageNumber,
+						filter.PageSize);
+
+					deals = result.Items;
+					totalCount = result.TotalCount;
 
 
-					dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
+					dealsResponse = deals.Select(d => new
 					{
 						DealId = d.DealId,
 						Buyer = d.BuyerContact.Name,
@@ -71,15 +82,19 @@ public class DealsController : ControllerBase
 				}
 			case "agent":
 				{
-					deals = await _unitOfWork.Deals.FindAllAsync(d => d.Agent.Id == Guid.Parse(userId), new string[] { "BuyerContact", "Property", "SellerContact", "Agent", "MeetingStatus", "BuyerConfirmationStatus", "SellerConfirmationStatus", "DealStatus" });
+					Expression<Func<Deal, bool>> predicate = d => d.Agent.Id == Guid.Parse(userId) && (!filter.DealStatusId.HasValue || d.DealStatusId == (int)filter.DealStatusId.Value);
 
-					if (dealStatusId.HasValue)
-					{
-						deals = deals.Where(d => d.DealStatusId == (int)dealStatusId.Value);
-					}
+					var result = await _unitOfWork.Deals.GetPaginatedAsync(
+						predicate,
+						includes,
+						q => q.OrderByDescending(d => d.DealDate),
+						filter.PageNumber,
+						filter.PageSize);
 
+					deals = result.Items;
+					totalCount = result.TotalCount;
 
-					dealsResponse = deals?.OrderByDescending(d => d.DealDate).Select(d => new
+					dealsResponse = deals.Select(d => new
 					{
 						DealId = d.DealId,
 						Buyer = d.BuyerContact.Name,
@@ -93,11 +108,17 @@ public class DealsController : ControllerBase
 					});
 					break;
 				}
-			
 		}
+		var paginatedResult = new PaginatedResult<object>
+		{
+			Data = dealsResponse.ToList(),
+			TotalCount = totalCount,
+			PageNumber = filter.PageNumber,
+			PageSize = filter.PageSize,
+		};
 
 
-		return Ok(dealsResponse);
+		return Ok(paginatedResult);
 	}
 
 	[Authorize]
@@ -176,9 +197,3 @@ public class DealsController : ControllerBase
 
 }
 
-public enum DealStatus
-{
-	InProgress = 1,
-	Completed = 2,
-	Canceled = 3
-}

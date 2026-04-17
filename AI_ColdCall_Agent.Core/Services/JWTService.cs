@@ -43,7 +43,7 @@ public class JWTService :IJWTService
 		var tokenGenerator = new JwtSecurityToken(
 			issuer: _configuration["JWT:Issuer"],
 			audience: _configuration["JWT:Audience"],
-			expires: DateTime.Now.AddHours(3),
+			expires: DateTime.Now.AddDays(1),
 			claims: claims,
 			signingCredentials: signingCredentials
 		);
@@ -56,7 +56,7 @@ public class JWTService :IJWTService
 			Token = token,
 			Email = user.Email,
 			PersonName = user.Name,
-			Expiration = DateTime.Now.AddHours(3)
+			Expiration = DateTime.Now.AddDays(1)
 		};
 
 		return respone;
