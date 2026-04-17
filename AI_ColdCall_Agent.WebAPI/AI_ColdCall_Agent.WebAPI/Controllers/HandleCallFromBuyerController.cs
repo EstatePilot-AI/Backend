@@ -215,11 +215,11 @@ public class HandleCallFromBuyerController : ControllerBase
 		var agents=await _userManager.GetUsersInRoleAsync("agent");
 		var notCompletedDeals = await _unitOfWork.Deals.FindAllAsync(d => d.DealStatusId != 2);
 
-		if (!agents.Any())
-		{
-			//assign super admin if there isn't any agent existing
-			return Guid.Parse("d8361abf-cd65-44d7-863d-dde32397149a");
-		}
+		//if (!agents.Any())
+		//{
+		//	//assign super admin if there isn't any agent existing
+		//	return Guid.Parse("d8361abf-cd65-44d7-863d-dde32397149a");
+		//}
 
 
 

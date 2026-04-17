@@ -147,6 +147,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+	// This makes the Enum appear as Strings in Swagger and JSON responses
+	options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 

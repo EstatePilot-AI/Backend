@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,8 @@ public class GetConversationData : ControllerBase
 	{
 		_httpClientFactory = httpClientFactory;
 	}
+
+	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetDataById/{id}")]
 	public async Task<IActionResult> GetDataById(string id)
 	{
@@ -54,6 +57,7 @@ public class GetConversationData : ControllerBase
 		}
 	}
 
+	[Authorize(Roles = "superadmin")]
 	[HttpGet("GetAudioById/{id}")]
 	public async Task<IActionResult> GetAudioById(string id)
 	{

@@ -2,6 +2,7 @@ using CsvHelper;
 using DTO;
 using Interfaces;
 using IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -121,6 +122,7 @@ public class ContactController : ControllerBase
 		return BadRequest(ModelState);
 	}
 
+	[Authorize(Roles = "superadmin")]
 	[HttpPost("UploadCSVForSellers")]
 	public async Task<IActionResult> UploadCSVForSellers(IFormFile file)
 	{
@@ -227,28 +229,6 @@ public class ContactController : ControllerBase
 			});
 		}
 
-		return BadRequest(ModelState);
-	}
-
-	[HttpPut("UpdateContactStatus{id:int}")]
-	public async Task<IActionResult> UpdateContactStatus(int id, string status)
-	{
-		if (ModelState.IsValid)
-		{
-			if (id <= 0)
-			{
-				return BadRequest("The contact ID provided is not valid. Please check and try again.");
-			}
-
-			var contact = _unitOfWork.Contacts.FindOneItem(c => c.ContactId == id, new string[] { "ContactStatus", "ContactStatus" });
-
-			if (contact == null)
-			{
-				return NotFound("We couldn't find this contact in the system. It may have been removed.");
-			}
-
-			
-		}
 		return BadRequest(ModelState);
 	}
 
