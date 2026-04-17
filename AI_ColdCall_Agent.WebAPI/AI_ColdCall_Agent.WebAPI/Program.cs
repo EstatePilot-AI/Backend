@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Repositories;
 using Services;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -51,6 +52,10 @@ builder.Services.AddSwaggerGen(swagger =>
 			new string[] { }
 		}
 	});
+
+	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+	swagger.IncludeXmlComments(xmlPath);
 });
 
 
@@ -80,7 +85,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<EmailSender>();   // inject EmailSender service
 builder.Services.AddTransient<IJWTService, JWTService>();  //inject JWTService
 
-builder.Services.AddScoped<DashboardAnalyticsService>(); 
+builder.Services.AddScoped<IDashboardAnalyticsService, DashboardAnalyticsService>(); 
 builder.Services.AddHttpClient();
 
 builder.Services.AddSignalR(options => {
