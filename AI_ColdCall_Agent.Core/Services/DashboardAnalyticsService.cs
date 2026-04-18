@@ -1,6 +1,7 @@
 using AI_ColdCall_Agent.Core.DTO;
 using Interfaces;
 using IServices;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,19 @@ public class DashboardAnalyticsService : IDashboardAnalyticsService
     public async Task<DashboardAnalyticsResponse?> BuildAnalyticsAsync(
         GlobalAnalyticsRequest request)
     {
-        var logs = await _unitOfWork.CallLogs.FindAllAsync(c =>
-            (!request.FromDate.HasValue || c.Timestamp >= request.FromDate.Value) &&
-            (!request.ToDate.HasValue || c.Timestamp <= request.ToDate.Value.AddDays(1)) &&
-            (string.IsNullOrEmpty(request.OutcomeName) ||
-             c.CallOutcome.Name.ToLower() == request.OutcomeName.ToLower()),
+		DateTime? fromDate = request.FromDate?.ToUniversalTime();
+		DateTime? toDate = request.ToDate?.ToUniversalTime();
+
+		if ((fromDate > toDate) || (toDate.HasValue && toDate.Value > DateTime.UtcNow))
+		{
+			return new DashboardAnalyticsResponse();
+		}
+
+		var logs = await _unitOfWork.CallLogs.FindAllAsync(c =>
+            (!request.FromDate.HasValue || c.Timestamp >= fromDate.Value) &&
+            (!request.ToDate.HasValue || c.Timestamp <= toDate.Value) &&
+            (string.IsNullOrEmpty(request.OutcomeName.ToString()) ||
+             c.CallOutcome.Name.Replace(" ", "").ToLower() == request.OutcomeName.ToString().ToLower()),
             new string[] { "CallOutcome" }
         );
 
