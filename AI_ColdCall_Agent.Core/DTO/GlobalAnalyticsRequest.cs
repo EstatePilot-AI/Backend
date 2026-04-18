@@ -25,7 +25,6 @@ namespace AI_ColdCall_Agent.Core.DTO
         /// Case-insensitive match. Omit to include all outcomes.
         /// </summary>
         /// <example>Interested</example>
-        [MaxLength(100)]
-        public string? OutcomeName { get; set; }
+        public CallLogOutcome? OutcomeName { get; set; }
     }
 }
