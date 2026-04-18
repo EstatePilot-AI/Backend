@@ -28,7 +28,7 @@ namespace AI_ColdCall_Agent.WebAPI.Controllers
             Expression<Func<Models.LeadRequest, bool>> predicate = l =>
                 (!filter.StatusId.HasValue || l.LeadRequestStatusId == filter.StatusId) &&
                 (string.IsNullOrWhiteSpace(filter.SearchTerm) ||
-                 l.BuyerName.Contains(filter.SearchTerm) ||
+                 l.BuyerName.ToLower().Contains(filter.SearchTerm.ToLower()) ||
                  (l.Contact != null && l.Contact.Phone.Contains(filter.SearchTerm)));
 
             var includes = new[] { "Contact", "LeadRequestStatus" };

@@ -24,11 +24,19 @@ public class CallLogController : ControllerBase
 	[HttpGet("GetAllCallLogs")]
 	public async Task<IActionResult> GetAllCallLogs([FromQuery] CallLogFilterDto filter)
 	{
+		DateTime? fromDate = filter.FromDate?.ToUniversalTime();
+		DateTime? toDate = filter.ToDate?.ToUniversalTime();
+
+		if ((fromDate > toDate) || (toDate.HasValue && toDate.Value > DateTime.UtcNow))
+		{
+			return BadRequest("The to date is in the future");
+		}
+
 		Expression<Func<Models.CallLog, bool>> predicate = cl =>
 			(!filter.CallOutcomeId.HasValue || cl.CallOutcomeId == (int)filter.CallOutcomeId.Value) &&
 			(!filter.CallSessionStateId.HasValue || cl.CallSessionStateId == filter.CallSessionStateId) &&
-			(!filter.FromDate.HasValue || cl.Timestamp >= filter.FromDate.Value) &&
-			(!filter.ToDate.HasValue || cl.Timestamp <= filter.ToDate.Value.AddDays(1)) &&
+			(!filter.FromDate.HasValue || cl.Timestamp >= fromDate.Value) &&
+			(!filter.ToDate.HasValue || cl.Timestamp <= toDate.Value) &&
 			(string.IsNullOrWhiteSpace(filter.SearchTerm) ||
 			 cl.ContactName.Contains(filter.SearchTerm));
 
