@@ -1,3 +1,4 @@
+using AI_ColdCall_Agent.Core.DTO;
 using DTO;
 using Identity;
 using Interfaces;
@@ -264,7 +265,7 @@ public class AccountController : ControllerBase
 
 	[Authorize(Roles ="superadmin")]
 	[HttpGet("GetAllUsers")]
-	public async Task<IActionResult> GetAllUsers()
+	public async Task<IActionResult> GetAllUsers(int pageNumber=1, int pageSize=10)
 	{
 		var users=await _userManager.Users.ToListAsync();
 		var usersListDto=new List<UserDto>();
@@ -286,7 +287,21 @@ public class AccountController : ControllerBase
 			}
 			usersListDto=usersListDto.Where(u=>u.Role!="superadmin").ToList();
 		}
-		return Ok(usersListDto);
+
+		int totalCount = 0;
+
+		var agents = usersListDto.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+		totalCount = usersListDto.Count();
+
+		var paginatedResult = new PaginatedResult<object>
+		{
+			Data = agents.ToList(),
+			TotalCount = totalCount,
+			PageNumber = pageNumber,
+			PageSize = pageSize,
+		};
+
+		return Ok(paginatedResult);
 	}
 
 
