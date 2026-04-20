@@ -23,6 +23,8 @@ public class DealsFilterDto
 	}
 
 	public DealStatus? DealStatusId { get; set; }
+
+	public string? SearchTerm { get; set; }
 }
 
 public enum DealStatus

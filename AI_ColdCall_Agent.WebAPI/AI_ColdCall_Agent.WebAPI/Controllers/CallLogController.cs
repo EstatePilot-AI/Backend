@@ -38,7 +38,7 @@ public class CallLogController : ControllerBase
 			(!filter.FromDate.HasValue || cl.Timestamp >= fromDate.Value) &&
 			(!filter.ToDate.HasValue || cl.Timestamp <= toDate.Value) &&
 			(string.IsNullOrWhiteSpace(filter.SearchTerm) ||
-			 cl.ContactName.Contains(filter.SearchTerm));
+			 cl.ContactName.ToLower().Contains(filter.SearchTerm.ToLower()));
 
 		var includes = new[] { "Contact", "CallOutcome", "SubjectTypeCall", "CallSessionState" };
 

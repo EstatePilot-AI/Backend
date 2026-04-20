@@ -51,7 +51,12 @@ public class DealsController : ControllerBase
 		{
 			case "superadmin":
 				{
-					Expression<Func<Deal, bool>> predicate = d => !filter.DealStatusId.HasValue || d.DealStatusId == (int)filter.DealStatusId.Value;
+					Expression<Func<Deal, bool>> predicate = d =>
+						(!filter.DealStatusId.HasValue || d.DealStatusId == (int)filter.DealStatusId.Value) &&
+						(string.IsNullOrWhiteSpace(filter.SearchTerm) ||
+						d.Agent.Name.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+						d.BuyerContact.Name.ToLower().Contains(filter.SearchTerm.ToLower()) ||
+						d.SellerContact.Name.ToLower().Contains(filter.SearchTerm.ToLower()));
 
 					var result = await _unitOfWork.Deals.GetPaginatedAsync(
 						predicate,
