@@ -350,6 +350,44 @@ public class AccountController : ControllerBase
 		return Ok(userDto);
 	}
 
+	[Authorize]
+	[HttpGet("GetMyProfileToApp")]
+	public async Task<IActionResult> GetMyProfileToApp()
+	{
+		var user = await _userManager.GetUserAsync(User);
+		var isRole = User.IsInRole("superadmin");
+
+		if (user == null)
+		{
+			return NotFound("Your session may have expired. Please log in again and retry.");
+		}
+
+		int dealsCount = 0;
+		int callLogsCount = 0;
+
+		if (isRole)
+		{
+			dealsCount = await _unitOfWork.Deals.Count(d => true);
+			callLogsCount = await _unitOfWork.CallLogs.Count(cl=>true);
+		}
+		else
+		{
+			dealsCount = await _unitOfWork.Deals.Count(d => d.AgentId == user.Id);
+		}
+
+			var userDto = new
+			{
+				Id = user.Id,
+				Name = user.Name,
+				Email = user.Email!,
+				PhoneNumber = user.PhoneNumber!,
+				Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()!,
+				DealsCount= dealsCount,
+				CallLogsCount= callLogsCount
+			};
+
+		return Ok(userDto);
+	}
 	[HttpPost("Logout")]
 	public async Task<IActionResult> Logout()
 	{
