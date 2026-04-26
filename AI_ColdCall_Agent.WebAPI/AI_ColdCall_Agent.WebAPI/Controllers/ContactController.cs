@@ -5,6 +5,7 @@ using IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
@@ -126,110 +127,163 @@ public class ContactController : ControllerBase
 	[HttpPost("UploadCSVForSellers")]
 	public async Task<IActionResult> UploadCSVForSellers(IFormFile file)
 	{
-		if (ModelState.IsValid)
+		if (!ModelState.IsValid)
 		{
-			if (file == null || file.Length == 0)
+			return BadRequest(ModelState);
+		}
+
+		if (file == null || file.Length == 0)
+		{
+			return BadRequest("Please select a CSV file to upload.");
+		}
+
+		List<ContactDto> allRecords;
+		try
+		{
+			using (var stream = new StreamReader(file.OpenReadStream()))
+			using (var csv = new CsvReader(stream, CultureInfo.InvariantCulture))
 			{
-				return BadRequest("Please select a CSV file to upload.");
+				allRecords = csv.GetRecords<ContactDto>().ToList();
 			}
+		}
+		catch (Exception)
+		{
+			return BadRequest("The uploaded file appears to be invalid or corrupted.");
+		}
 
-			//Read All data from CSV file
-			List<ContactDto> allRecords;
+		// 1. Clean data: Remove whitespace and filter out null phones/emails
+		// This prevents " 123" being treated differently than "123"
+		foreach (var record in allRecords)
+		{
+			record.Phone = record.Phone?.Trim();
+			record.Email = record.Email?.Trim();
+		}
 
+		// 2. Pre-fetch existing sellers from DB (checking BOTH Phone and Email)
+		var incomingPhones = allRecords.Where(p => !string.IsNullOrEmpty(p.Phone)).Select(p => p.Phone).ToList();
+		var incomingEmails = allRecords.Where(e => !string.IsNullOrEmpty(e.Email)).Select(e => e.Email).ToList();
+
+		var existingSellers = await _unitOfWork.Contacts.FindAllAsync(s =>
+			incomingPhones.Contains(s.Phone) || incomingEmails.Contains(s.Email));
+
+		// Create dictionaries for fast lookup
+		var existingPhonesDict = existingSellers.Where(s => s.Phone != null).ToDictionary(s => s.Phone, s => s);
+		var existingEmailsDict = existingSellers.Where(s => s.Email != null).ToDictionary(s => s.Email, s => s);
+
+		int successCount = 0;
+		List<string> errors = new List<string>();
+
+		foreach (var csvRecord in allRecords)
+		{
 			try
 			{
-				using (var stream = new StreamReader(file.OpenReadStream()))
+				// 1. Validation
+				var context = new ValidationContext(csvRecord);
+				var validationResults = new List<ValidationResult>();
+				if (!Validator.TryValidateObject(csvRecord, context, validationResults, true))
 				{
-					using (var csv = new CsvReader(stream, CultureInfo.InvariantCulture))
-					{
-						//Get all records from csv file and put them into list
-						allRecords = csv.GetRecords<ContactDto>().ToList();
-					}
+					errors.Add($"Row skipped (Validation): {csvRecord.Name} - {validationResults[0].ErrorMessage}");
+					continue;
 				}
+
+				Contact sellerByPhone = null;
+				Contact sellerByEmail = null;
+
+				bool existsByPhone = !string.IsNullOrEmpty(csvRecord.Phone) &&
+									 existingPhonesDict.TryGetValue(csvRecord.Phone, out sellerByPhone);
+
+				bool existsByEmail = !string.IsNullOrEmpty(csvRecord.Email) &&
+									 existingEmailsDict.TryGetValue(csvRecord.Email, out sellerByEmail);
+
+				// --- OVERWRITE LOGIC ---
+				if (existsByPhone)
+				{
+					// The phone exists, so this is our primary record to update.
+					var existing = sellerByPhone;
+
+					// If the CSV provides a new email that is currently owned by SOMEONE ELSE...
+					if (existsByEmail && sellerByEmail.ContactId != sellerByPhone.ContactId)
+					{
+						// the email from the OTHER person before giving it to this person.
+						sellerByEmail.Email = "X@yahoo.com";
+					}
+
+					// Overwrite with new data from CSV
+					existing.Name = csvRecord.Name;
+					existing.Email = csvRecord.Email; // Take the new email
+					existing.ContactStatusId = 1; // Set to pending_call
+					existing.ContactTypeId = 2; //seller
+
+					// Update the email dictionary so subsequent rows know this email is now taken by 'existing'
+					if (!string.IsNullOrEmpty(existing.Email))
+					{
+						existingEmailsDict[existing.Email] = existing;
+					}
+
+					continue;
+				}
+				else if (existsByEmail)
+				{
+					// Phone is new, but Email exists. 
+					// we update the person who has this email with the new phone.
+					var existing = sellerByEmail;
+
+					existing.Name = csvRecord.Name;
+					existing.Phone = csvRecord.Phone; // Take the new phone
+					existing.ContactStatusId = 1; // Set to pending_call
+					existing.ContactTypeId = 2; //seller
+
+
+					// Update phone dictionary for subsequent rows
+					if (!string.IsNullOrEmpty(existing.Phone))
+					{
+						existingPhonesDict[existing.Phone] = existing;
+					}
+
+					continue;
+				}
+
+				// 4. Create New Seller (only if neither phone nor email exists)
+				var newSeller = new Contact()
+				{
+					Name = csvRecord.Name,
+					Phone = csvRecord.Phone,
+					Email = csvRecord.Email,
+					ContactTypeId = 2, //seller
+					ContactStatusId = 1 //pending_call
+				};
+
+				await _unitOfWork.Contacts.AddAsync(newSeller);
+
+				if (!string.IsNullOrEmpty(newSeller.Phone))
+					existingPhonesDict.TryAdd(newSeller.Phone, newSeller);
+
+				if (!string.IsNullOrEmpty(newSeller.Email))
+					existingEmailsDict.TryAdd(newSeller.Email, newSeller);
+
+				successCount++;
 			}
 			catch (Exception ex)
 			{
-				return BadRequest("The uploaded file appears to be invalid or corrupted. Please make sure it's a properly formatted CSV file.");
+				errors.Add($"Failed to process {csvRecord.Phone}: {ex.Message}");
 			}
-
-
-			//Extract all distinct phone numbers from the CSV records
-			var incomingPhones = allRecords.Where(p => p.Phone != null).Select(p => p.Phone).Distinct().ToList();
-
-			//Get All sellers from DB whose phone numbers are in the incomingPhones list
-			var existingSellers = await _unitOfWork.Contacts.FindAllAsync(s =>incomingPhones.Contains(s.Phone));
-
-			var existingSellersDictionary = existingSellers.ToDictionary(s => s.Phone, s => s);
-
-
-			int successCount = 0;
-			List<string> errors = new List<string>();
-
-			// List to keep track of IDs we need to call
-			List<int> idsToQueue = new List<int>();
-
-			foreach (var csvRecord in allRecords)
-			{
-
-				try
-				{
-					// Validate Format for name and phonenumber
-					var context = new ValidationContext(csvRecord);
-					var validationResults = new List<ValidationResult>();
-					if (!Validator.TryValidateObject(csvRecord, context, validationResults, true))
-					{
-						errors.Add($"Row skipped (Validation): {csvRecord.Name} - {validationResults[0].ErrorMessage}");
-						continue;
-					}
-
-					//Check Duplicates in phone numbers
-					if (existingSellersDictionary.TryGetValue(csvRecord.Phone, out var existingSeller))
-					{
-						existingSeller.Name = csvRecord.Name;
-						existingSeller.Email = csvRecord.Email;
-						existingSeller.ContactStatusId = 1; // if the seller is existing into system return the status to pending_call
-						existingSeller.ContactTypeId = 2; //seller
-
-						idsToQueue.Add(existingSeller.ContactId); // Add existing to queue
-
-						errors.Add($"Row skipped (Duplicate): {csvRecord.Phone} exists.");
-						continue;
-					}
-
-					var newSeller = new Contact()
-					{
-						Name = csvRecord.Name,
-						Phone = csvRecord.Phone,
-						Email = csvRecord.Email,
-						ContactTypeId = 2, //2 for Seller
-						ContactStatusId = 1 //1 for pending_call
-					};
-
-					await _unitOfWork.Contacts.AddAsync(newSeller);
-
-					//add new seller to existingSellersDictionary to avoid duplicates in the same CSV upload
-					existingSellersDictionary.Add(newSeller.Phone, newSeller);
-
-					idsToQueue.Add(newSeller.ContactId);
-
-					successCount++;  //increment the count of actually new sellers
-				}
-				catch (Exception ex)
-				{
-					errors.Add($"Failed to save {csvRecord.Email}: {ex.Message}");
-				}
-			}
-			_unitOfWork.Save();
-
-			return Ok(new
-			{
-				TotalRead = allRecords.Count(),
-				Save = successCount,
-				Errors = errors
-			});
 		}
 
-		return BadRequest(ModelState);
+		try
+		{
+			_unitOfWork.Save();
+		}
+		catch (DbUpdateException ex)
+		{
+			return BadRequest("Database error: A unique constraint was violated that wasn't caught by the pre-check.");
+		}
+
+		return Ok(new
+		{
+			TotalRead = allRecords.Count,
+			Saved = successCount,
+			Errors = errors
+		});
 	}
 
 }

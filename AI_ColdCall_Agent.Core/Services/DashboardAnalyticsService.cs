@@ -23,6 +23,11 @@ public class DashboardAnalyticsService : IDashboardAnalyticsService
     public async Task<DashboardAnalyticsResponse?> BuildAnalyticsAsync(
         GlobalAnalyticsRequest request)
     {
+        if (request == null)
+        {
+			return new DashboardAnalyticsResponse();
+		}
+
 		DateTime? fromDate = request.FromDate?.ToUniversalTime();
 		DateTime? toDate = request.ToDate?.ToUniversalTime();
 

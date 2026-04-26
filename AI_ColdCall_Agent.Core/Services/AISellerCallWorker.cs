@@ -81,8 +81,8 @@ public class AISellerCallWorker : BackgroundService
 				_logger.LogError(ex, "Worker Loop Error");
 			}
 
-			// Wait 15-20 seconds before checking the DB again
-			await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
+			// Wait 3 seconds before checking the DB again
+			await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
 		}
 	}
 

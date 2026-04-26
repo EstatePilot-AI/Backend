@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using Models;
 using RestSharp.Extensions;
 using Services;
+using System.Linq.Expressions;
 
 namespace Controllers;
 
@@ -65,16 +66,10 @@ public class PropertyController : ControllerBase
 	[HttpGet("GetPropertyById/{id}")]
     public async Task<IActionResult> GetPropertyById(int id)
     {
-        var property = _unitOfWork.Properties.FindOneItem(
-            p => p.PropertyId == id,
-            new string[] {
-            "PropertyType",
-            "PropertyStatus",
-            "FinishingType",
-            "PropertiesLocation",
-			"propertyImages"
-			}
-        );
+		var property = _unitOfWork.Properties.FindOneItem(
+			p => p.PropertyId == id,
+			new string[] { "PropertyType", "PropertyStatus", "FinishingType", "PropertiesLocation", "propertyImages" }
+		);
 
         if (property == null)
         {
@@ -111,25 +106,37 @@ public class PropertyController : ControllerBase
     }
 
     [HttpGet("GetAllProperties")]
-    public async Task<IActionResult> GetAllProperties()
+    public async Task<IActionResult> GetAllProperties(int pageNumber=1, int pageSize=10, [FromQuery] string? term=null)
     {
-        var properties = await _unitOfWork.Properties.FindAllAsync(p=>p.PropertyStatusId==1,
-		   new string[] {
-			"PropertyType",
-			"PropertyStatus",
-			"FinishingType",
-			"PropertiesLocation",
-			"propertyImages"
-			}
-		);
+		IEnumerable<Property> properties;
+		int totalCount = 0;
+		IEnumerable<PropertyResponse> propertyResponses = [];
 
-        if (properties == null || !properties.Any())
-        {
-            return Ok(new List<PropertyResponse>());
-        }
+		var includes = new string[] { "PropertyType", "PropertyStatus", "FinishingType", "PropertiesLocation", "propertyImages" };
+
+		Expression<Func<Property, bool>> predicate = p =>
+									p.PropertyStatusId == 1 &&
+									(string.IsNullOrWhiteSpace(term) ||
+									(p.PropertyType != null && p.PropertyType.Name.ToLower().Contains(term.ToLower())) ||
+									(p.FinishingType != null && p.FinishingType.Name.ToLower().Contains(term.ToLower())) ||
+									(p.PropertiesLocation != null && (
+									p.PropertiesLocation.City.Contains(term) ||
+									p.PropertiesLocation.Governorate.Contains(term) ||
+									p.PropertiesLocation.District.Contains(term)
+									)));
+
+		var result = await _unitOfWork.Properties.GetPaginatedAsync(
+						predicate,
+						includes,
+						p => p.OrderByDescending(p => p.CreatedAt),
+						pageNumber,
+						pageSize);
+
+		properties = result.Items;
+		totalCount = result.TotalCount;
 
 
-        var propertyResponses = properties.OrderByDescending(p=>p.CreatedAt).Select(p => new PropertyResponse
+        propertyResponses = properties.Select(p => new PropertyResponse
         {
             PropertyId = p.PropertyId,
             Price = p.Price,
@@ -145,8 +152,18 @@ public class PropertyController : ControllerBase
 
         }).ToList();
 
-        return Ok(propertyResponses);
-    }
+
+		var paginatedResult = new PaginatedResult<object>
+		{
+			Data = propertyResponses.ToList(),
+			TotalCount = totalCount,
+			PageNumber = pageNumber,
+			PageSize = pageSize,
+		};
+
+
+		return Ok(paginatedResult);
+	}
 
 	[HttpGet("GetAllPropertiesWithDetails")]
 	public async Task<IActionResult> GetAllPropertiesWithDetails()
@@ -437,56 +454,57 @@ public class PropertyController : ControllerBase
 		}); 
     }
 
-	[HttpGet("GlobalSearch")]
-    public async Task<IActionResult> GlobalSearch([FromQuery] string term)
-    {
-        if (string.IsNullOrWhiteSpace(term))
-        {
-            return BadRequest("Please enter a keyword to search for properties (e.g., city name, property type).");
-        }
+   //[HttpGet("GlobalSearch")]
+  //  public async Task<IActionResult> GlobalSearch([FromQuery] string term)
+  //  {
+  //      if (string.IsNullOrWhiteSpace(term))
+  //      {
+  //          return BadRequest("Please enter a keyword to search for properties (e.g., city name, property type).");
+  //      }
 
     
-        var properties = await _unitOfWork.Properties.FindAllAsync(p=>p.PropertyStatusId==1,
-		   new string[] {
-			"PropertyType",
-			"PropertyStatus",
-			"FinishingType",
-			"PropertiesLocation",
-			"propertyImages"
-			}
-        );
+  //      var properties = await _unitOfWork.Properties.FindAllAsync(p=>p.PropertyStatusId==1,
+		//   new string[] {
+		//	"PropertyType",
+		//	"PropertyStatus",
+		//	"FinishingType",
+		//	"PropertiesLocation",
+		//	"propertyImages"
+		//	}
+  //      );
 
        
-        var filteredResults = properties.Where(p =>
-            (p.PropertyType != null && p.PropertyType.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-            (p.FinishingType != null && p.FinishingType.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-            (p.PropertiesLocation != null && (
-                p.PropertiesLocation.City.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.PropertiesLocation.Governorate.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.PropertiesLocation.District.Contains(term, StringComparison.OrdinalIgnoreCase)
-            ))
-        ).ToList();
+  //      var filteredResults = properties.Where(p =>
+  //          (p.PropertyType != null && p.PropertyType.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+  //          (p.FinishingType != null && p.FinishingType.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+  //          (p.PropertiesLocation != null && (
+  //              p.PropertiesLocation.City.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+  //              p.PropertiesLocation.Governorate.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+  //              p.PropertiesLocation.District.Contains(term, StringComparison.OrdinalIgnoreCase)
+  //          ))
+  //      ).ToList();
 
         
-        var response = filteredResults.Select(p => new PropertyResponse
-        {
-			PropertyId = p.PropertyId,
-			Price = p.Price,
-			Area = p.Area,
+  //      var response = filteredResults.Select(p => new PropertyResponse
+  //      {
+		//	PropertyId = p.PropertyId,
+		//	Price = p.Price,
+		//	Area = p.Area,
 
-			PropertyType = p.PropertyType?.Name,
-			Status = p.PropertyStatus?.Name,
+		//	PropertyType = p.PropertyType?.Name,
+		//	Status = p.PropertyStatus?.Name,
 
-			City = p.PropertiesLocation?.Country,
-			District = p.PropertiesLocation?.City,
+		//	City = p.PropertiesLocation?.Country,
+		//	District = p.PropertiesLocation?.City,
 
-            CreatedAt=GetTimeAgo(p.CreatedAt),
+  //          CreatedAt=GetTimeAgo(p.CreatedAt),
 
-			ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
-		}).ToList();
+		//	ImageURLs = p.propertyImages?.Select(p => p.ImageURL).ToList()
+		//}).ToList();
 
-        return Ok(response);
-    }
+  //      return Ok(response);
+  //  }
+
 }
 
 
