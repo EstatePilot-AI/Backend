@@ -46,11 +46,11 @@ The backend application and its supporting database infrastructure are fully dep
 
 The system implements strict **Clean Architecture / Onion Architecture** rules to guarantee complete decoupling of business rules from database systems or user-facing protocols:
 
+```text
 ├── EstatePilot.Core / Domain          # Entities, Value objects, repository abstractions
 ├── EstatePilot.Application            # Business workflows, DTO structures, CQRS handlers
 ├── EstatePilot.Infrastructure         # DBContext, Identity Setup, External integrations (Neon Cloud)
 └── EstatePilot.WebAPI                 # Controllers, Middleware filters, Swagger configurations
-
 
 ### System Architecture Flow
 ```mermaid
