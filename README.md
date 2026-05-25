@@ -17,7 +17,7 @@ The backend application and its supporting database infrastructure are fully dep
 * **Database Engine:** Managed Serverless **Neon PostgreSQL** cluster.
 
 ### 📸 Production API Dashboard Preview
-![Estate Pilot Swagger Dashboard](screencapture-estatepilot-runasp-net-index-html-2026-05-25-18_45_38.jpg)
+![Estate Pilot Swagger Dashboard](https://github.com/EstatePilot-AI/Backend/issues/66)
 
 > **Note for Reviewers:** You can use the live Swagger link above to directly test the authentication pipelines, real estate database queries, and AI agent log endpoints live without needing to set up a local database environment.
 
