@@ -50,11 +50,13 @@ The system implements strict **Clean Architecture / Onion Architecture** rules t
 ├── EstatePilot.Core / Domain          # Entities, Value objects, repository abstractions
 ├── EstatePilot.Application            # Business workflows, DTO structures, CQRS handlers
 ├── EstatePilot.Infrastructure         # DBContext, Identity Setup, External integrations (Neon Cloud)
-└── EstatePilot.WebAPI                 # Controllers, Middleware filters, Swagger configurations
+└── EstatePilot.WebAPI                 # Controllers, Middleware filters, Swagger configurations```
 
+### System Architecture Flow
+```mermaid
 graph TD
-    API[WebAPI Layer / SmarterASP.NET] --> Application[Application Layer]
-    API --> Infrastructure[Infrastructure Layer]
+    API[WebAPI Layer / SmarterASP.NET] --> Application[Application/Services Layer]
     Application --> Core[Core Domain Entities]
-    Infrastructure --> Core
-    Infrastructure --> Neon[Neon Serverless PostgreSQL]
+    Infrastructure[Infrastructure Layer] --> Core
+    Infrastructure --> Application
+    Infrastructure --> Neon[Neon Serverless PostgreSQL]```
