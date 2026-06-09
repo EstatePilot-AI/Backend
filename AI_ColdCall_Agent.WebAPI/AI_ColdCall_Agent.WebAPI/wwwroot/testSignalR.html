@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR Dashboard Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+</head>
+<body>
+    <h2>SignalR Dashboard Test</h2>
+
+    <div>
+        <label>JWT Token:</label><br />
+        <textarea id="tokenInput" rows="4" cols="80"
+                  placeholder="Paste your token here (without 'Bearer ')"></textarea>
+        <br />
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <br />
+    <div>
+        <strong>Status:</strong>
+        <span id="status" style="color: red;">Disconnected</span>
+    </div>
+
+    <br />
+    <div>
+        <strong>Received Data:</strong>
+        <pre id="output" style="background:#f4f4f4; padding:10px; height:400px; overflow:auto;"></pre>
+    </div>
+
+    <script>
+        let connection = null;
+
+        async function connect() {
+            const token = document.getElementById("tokenInput").value.trim();
+
+            if (!token) {
+                alert("Please paste your JWT token first.");
+                return;
+            }
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/dashboardHub", {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Debug)
+                .build();
+
+            connection.on("ReceiveDashboardUpdate", (data) => {
+                const output = document.getElementById("output");
+                output.textContent = JSON.stringify(data, null, 2);
+                console.log("Dashboard update received:", data);
+            });
+
+            connection.onreconnecting(() => {
+                document.getElementById("status").textContent = "Reconnecting...";
+                document.getElementById("status").style.color = "orange";
+            });
+
+            connection.onreconnected(() => {
+                document.getElementById("status").textContent = "Connected";
+                document.getElementById("status").style.color = "green";
+            });
+
+            connection.onclose((err) => {
+                document.getElementById("status").textContent = "Disconnected";
+                document.getElementById("status").style.color = "red";
+                if (err) console.error("Connection closed with error:", err);
+            });
+
+            try {
+                await connection.start();
+                document.getElementById("status").textContent = "Connected";
+                document.getElementById("status").style.color = "green";
+                console.log("SignalR connected successfully.");
+            } catch (err) {
+                document.getElementById("status").textContent = "Failed: " + err;
+                document.getElementById("status").style.color = "red";
+                console.error("SignalR connection error:", err);
+            }
+        }
+
+        async function disconnect() {
+            if (connection) {
+                await connection.stop();
+                document.getElementById("status").textContent = "Disconnected";
+                document.getElementById("status").style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>

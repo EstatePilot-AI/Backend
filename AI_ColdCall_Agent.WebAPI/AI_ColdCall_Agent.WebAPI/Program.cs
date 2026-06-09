@@ -65,6 +65,9 @@ builder.Services.AddCors(options =>
 	options.AddPolicy("AllowAll", policy =>
 	{
 		policy.SetIsOriginAllowed(origin => true)
+			   .WithOrigins(
+				"http://localhost:5173/",
+				"https://your-app.vercel.app/")
 			  .AllowAnyMethod()
 			  .AllowAnyHeader()
 			  .AllowCredentials(); //for SignalR

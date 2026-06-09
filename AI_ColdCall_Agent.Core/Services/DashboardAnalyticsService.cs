@@ -21,12 +21,9 @@ public class DashboardAnalyticsService : IDashboardAnalyticsService
 
     /// <inheritdoc/>
     public async Task<DashboardAnalyticsResponse?> BuildAnalyticsAsync(
-        GlobalAnalyticsRequest request)
+        GlobalAnalyticsRequest? request)
     {
-        if (request == null)
-        {
-			return new DashboardAnalyticsResponse();
-		}
+		request ??= new GlobalAnalyticsRequest();
 
 		DateTime? fromDate = request.FromDate?.ToUniversalTime();
 		DateTime? toDate = request.ToDate?.ToUniversalTime();
